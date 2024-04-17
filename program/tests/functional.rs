@@ -44,7 +44,9 @@ async fn test_revoke_pending_activation() {
     let destination = Pubkey::new_unique();
     let mock_active_feature_keypair = Keypair::new();
 
-    let mut program_test = ProgramTest::new(
+    let mut program_test = ProgramTest::default();
+    program_test.prefer_bpf(true);
+    program_test.add_program(
         "solana_feature_gate_program",
         solana_feature_gate_program::id(),
         processor!(solana_feature_gate_program::processor::process),

@@ -12,7 +12,7 @@ edition = "2021"
 program-id = "Feature111111111111111111111111111111111111"
 
 [features]
-no-entrypoint = []
+bpf-entrypoint = []
 test-sbf = []
 
 [dependencies]

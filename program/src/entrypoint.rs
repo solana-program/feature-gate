@@ -1,15 +1,22 @@
 //! Program entrypoint
 
 use {
-    crate::processor,
-    solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey},
+    crate::{error::FeatureGateError, processor},
+    solana_program::{
+        account_info::AccountInfo, entrypoint::ProgramResult, program_error::PrintProgramError,
+        pubkey::Pubkey,
+    },
 };
 
 solana_program::entrypoint!(process_instruction);
 fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    input: &[u8],
+    instruction_data: &[u8],
 ) -> ProgramResult {
-    processor::process(program_id, accounts, input)
+    if let Err(error) = processor::process(program_id, accounts, instruction_data) {
+        error.print::<FeatureGateError>();
+        return Err(error);
+    }
+    Ok(())
 }
