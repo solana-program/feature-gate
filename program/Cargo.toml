@@ -1,8 +1,28 @@
 [package]
 name = "solana-feature-gate-program"
 version = "0.1.0"
+description = "Solana Feature Gate Program"
+authors = ["Anza Technology Maintainers <maintainers@anza.xyz>"]
+repository = "https://github.com/solana-program/feature-gate"
+readme = "./README.md"
+license-file = "../LICENSE"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.solana]
+program-id = "Feature111111111111111111111111111111111111"
+
+[features]
+no-entrypoint = []
+test-sbf = []
 
 [dependencies]
+num_enum = "0.7.2"
+solana-program = "1.18.2"
+spl-program-error = "0.3.1"
+
+[dev-dependencies]
+solana-program-test = "1.18.2"
+solana-sdk = "1.18.2"
+
+[lib]
+crate-type = ["cdylib", "lib"]
