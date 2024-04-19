@@ -1,14 +1,12 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+//! Feature Gate program
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#![deny(missing_docs)]
+#![cfg_attr(not(test), forbid(unsafe_code))]
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+#[cfg(all(target_os = "solana", feature = "bpf-entrypoint"))]
+mod entrypoint;
+pub mod error;
+pub mod instruction;
+pub mod processor;
+
+solana_program::declare_id!("Feature111111111111111111111111111111111111");
