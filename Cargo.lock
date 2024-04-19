@@ -3758,7 +3758,7 @@ dependencies = [
  "solana-program",
  "solana-program-test",
  "solana-sdk",
- "spl-program-error",
+ "spl-program-error 0.4.0",
 ]
 
 [[package]]
@@ -4678,7 +4678,7 @@ dependencies = [
  "bytemuck",
  "solana-program",
  "solana-zk-token-sdk",
- "spl-program-error",
+ "spl-program-error 0.3.1",
 ]
 
 [[package]]
@@ -4690,7 +4690,20 @@ dependencies = [
  "num-derive 0.4.2",
  "num-traits",
  "solana-program",
- "spl-program-error-derive",
+ "spl-program-error-derive 0.3.2",
+ "thiserror",
+]
+
+[[package]]
+name = "spl-program-error"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5528f4dfa2a905012007999526955c79162c09668c69ad3c3f2ddfbd0b2984a4"
+dependencies = [
+ "num-derive 0.4.2",
+ "num-traits",
+ "solana-program",
+ "spl-program-error-derive 0.4.0",
  "thiserror",
 ]
 
@@ -4699,6 +4712,18 @@ name = "spl-program-error-derive"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1845dfe71fd68f70382232742e758557afe973ae19e6c06807b2c30f5d5cb474"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "sha2 0.10.8",
+ "syn 2.0.59",
+]
+
+[[package]]
+name = "spl-program-error-derive"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "641aa3116b1d58481e921b5d41dafc26a67bd488cb288330dbde004641764dd4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4716,7 +4741,7 @@ dependencies = [
  "solana-program",
  "spl-discriminator",
  "spl-pod",
- "spl-program-error",
+ "spl-program-error 0.3.1",
  "spl-type-length-value",
 ]
 
@@ -4769,7 +4794,7 @@ dependencies = [
  "solana-program",
  "spl-discriminator",
  "spl-pod",
- "spl-program-error",
+ "spl-program-error 0.3.1",
 ]
 
 [[package]]
@@ -4782,7 +4807,7 @@ dependencies = [
  "solana-program",
  "spl-discriminator",
  "spl-pod",
- "spl-program-error",
+ "spl-program-error 0.3.1",
  "spl-type-length-value",
 ]
 
@@ -4797,7 +4822,7 @@ dependencies = [
  "solana-program",
  "spl-discriminator",
  "spl-pod",
- "spl-program-error",
+ "spl-program-error 0.3.1",
  "spl-tlv-account-resolution",
  "spl-type-length-value",
 ]
@@ -4812,7 +4837,7 @@ dependencies = [
  "solana-program",
  "spl-discriminator",
  "spl-pod",
- "spl-program-error",
+ "spl-program-error 0.3.1",
 ]
 
 [[package]]
