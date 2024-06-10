@@ -9,7 +9,6 @@ use {
     solana_sdk::{
         account::Account as SolanaAccount,
         feature::{activate_with_lamports, Feature},
-        pubkey::Pubkey,
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
     },
@@ -41,7 +40,6 @@ async fn setup_pending_feature(
 #[tokio::test]
 async fn test_revoke_pending_activation() {
     let feature_keypair = Keypair::new();
-    let destination = Pubkey::new_unique();
     let mock_active_feature_keypair = Keypair::new();
 
     let mut program_test = ProgramTest::new(
@@ -71,7 +69,7 @@ async fn test_revoke_pending_activation() {
     setup_pending_feature(&mut context, &feature_keypair, rent_lamports).await;
 
     // Fail: feature not signer
-    let mut revoke_ix = revoke_pending_activation(&feature_keypair.pubkey(), &destination);
+    let mut revoke_ix = revoke_pending_activation(&feature_keypair.pubkey());
     revoke_ix.accounts[0].is_signer = false;
     let transaction = Transaction::new_signed_with_payer(
         &[revoke_ix],
@@ -94,7 +92,6 @@ async fn test_revoke_pending_activation() {
     let transaction = Transaction::new_signed_with_payer(
         &[revoke_pending_activation(
             &mock_active_feature_keypair.pubkey(),
-            &destination,
         )],
         Some(&context.payer.pubkey()),
         &[&context.payer, &mock_active_feature_keypair],
@@ -116,10 +113,7 @@ async fn test_revoke_pending_activation() {
 
     // Success: Revoke a feature activation
     let transaction = Transaction::new_signed_with_payer(
-        &[revoke_pending_activation(
-            &feature_keypair.pubkey(),
-            &destination,
-        )],
+        &[revoke_pending_activation(&feature_keypair.pubkey())],
         Some(&context.payer.pubkey()),
         &[&context.payer, &feature_keypair],
         context.last_blockhash,
@@ -131,18 +125,11 @@ async fn test_revoke_pending_activation() {
         .await
         .unwrap();
 
-    // Confirm feature account was closed and destination account received lamports
+    // Confirm feature account was closed.
     let feature_account = context
         .banks_client
         .get_account(feature_keypair.pubkey())
         .await
         .unwrap();
     assert!(feature_account.is_none());
-    let destination_account = context
-        .banks_client
-        .get_account(destination)
-        .await
-        .unwrap()
-        .unwrap();
-    assert_eq!(destination_account.lamports, rent_lamports);
 }
