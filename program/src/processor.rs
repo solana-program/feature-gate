@@ -6,10 +6,11 @@ use {
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
         feature::Feature,
-        msg,
+        incinerator, msg,
+        program::invoke,
         program_error::ProgramError,
         pubkey::Pubkey,
-        system_program,
+        system_instruction, system_program,
     },
 };
 
@@ -22,7 +23,8 @@ pub fn process_revoke_pending_activation(
     let account_info_iter = &mut accounts.iter();
 
     let feature_info = next_account_info(account_info_iter)?;
-    let destination_info = next_account_info(account_info_iter)?;
+    let incinerator_info = next_account_info(account_info_iter)?;
+    let _system_program_info = next_account_info(account_info_iter)?;
 
     if !feature_info.is_signer {
         return Err(ProgramError::MissingRequiredSignature);
@@ -36,16 +38,16 @@ pub fn process_revoke_pending_activation(
         return Err(FeatureGateError::FeatureAlreadyActivated.into());
     }
 
-    let new_destination_lamports = feature_info
-        .lamports()
-        .checked_add(destination_info.lamports())
-        .ok_or::<ProgramError>(FeatureGateError::Overflow.into())?;
-
-    **feature_info.try_borrow_mut_lamports()? = 0;
-    **destination_info.try_borrow_mut_lamports()? = new_destination_lamports;
-
+    // Clear data and reassign.
     feature_info.realloc(0, true)?;
     feature_info.assign(&system_program::id());
+
+    // Burn the lamports.
+    let lamports = feature_info.lamports();
+    invoke(
+        &system_instruction::transfer(feature_info.key, &incinerator::id(), lamports),
+        &[feature_info.clone(), incinerator_info.clone()],
+    )?;
 
     Ok(())
 }

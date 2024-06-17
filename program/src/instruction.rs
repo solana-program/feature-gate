@@ -3,9 +3,11 @@
 use {
     num_enum::{IntoPrimitive, TryFromPrimitive},
     solana_program::{
+        incinerator,
         instruction::{AccountMeta, Instruction},
         program_error::ProgramError,
         pubkey::Pubkey,
+        system_program,
     },
 };
 
@@ -14,6 +16,8 @@ use {
 #[repr(u8)]
 pub enum FeatureGateInstruction {
     /// Revoke a pending feature activation.
+    ///
+    /// This instruction will burn any lamports in the feature account.
     ///
     /// A "pending" feature activation is a feature account that has been
     /// allocated and assigned, but hasn't yet been updated by the runtime
@@ -24,7 +28,8 @@ pub enum FeatureGateInstruction {
     /// Accounts expected by this instruction:
     ///
     ///   0. `[w+s]`    Feature account
-    ///   1. `[w]`      Destination (for rent lamports)
+    ///   1. `[w]`      Incinerator
+    ///   2. `[ ]`      System program
     RevokePendingActivation,
 }
 impl FeatureGateInstruction {
@@ -45,10 +50,11 @@ impl FeatureGateInstruction {
 }
 
 /// Creates a 'RevokePendingActivation' instruction.
-pub fn revoke_pending_activation(feature_id: &Pubkey, destination: &Pubkey) -> Instruction {
+pub fn revoke_pending_activation(feature_id: &Pubkey) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*feature_id, true),
-        AccountMeta::new(*destination, false),
+        AccountMeta::new(incinerator::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
     ];
 
     let data = FeatureGateInstruction::RevokePendingActivation.pack();
