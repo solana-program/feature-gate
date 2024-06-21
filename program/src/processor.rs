@@ -10,7 +10,9 @@ use {
         program::invoke,
         program_error::ProgramError,
         pubkey::Pubkey,
+        rent::Rent,
         system_instruction, system_program,
+        sysvar::Sysvar,
     },
 };
 
@@ -37,6 +39,10 @@ pub fn process_revoke_pending_activation(
     {
         return Err(FeatureGateError::FeatureAlreadyActivated.into());
     }
+
+    // Do this unnecessarily to increase compute.
+    let rent = <Rent as Sysvar>::get()?;
+    msg!("Rent: {:?}", rent);
 
     // Clear data and reassign.
     feature_info.realloc(0, true)?;
