@@ -21,7 +21,7 @@ solana-program = "1.18.2"
 spl-program-error = "0.4.0"
 
 [dev-dependencies]
-solana-program-test = "1.18.2"
+mollusk-svm = { git = "https://github.com/buffalojoec/mollusk.git" }
 solana-sdk = "1.18.2"
 
 [lib]
