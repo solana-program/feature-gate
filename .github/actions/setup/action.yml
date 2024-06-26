@@ -1,0 +1,44 @@
+name: Setup environment
+
+inputs:
+  cache:
+    description: Enable caching
+    default: "true"
+  node:
+    description: The Node.js version to install
+    required: true
+  solana:
+    description: The Solana version to install
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node }}
+        cache: "pnpm"
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      shell: bash
+    - name: Set env vars
+      shell: bash
+      run: pnpm ci:set-env
+    - name: Install Rustfmt
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ env.RUSTFMT_NIGHTLY_VERSION }}
+        components: rustfmt
+    - name: Install Clippy
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ env.CLIPPY_NIGHTLY_VERSION }}
+        components: clippy
+    - name: Install Solana
+      if: ${{ inputs.solana != '' }}
+      uses: metaplex-foundation/actions/install-solana@v1
+      with:
+        version: ${{ inputs.solana }}
+        cache: ${{ inputs.cache }}
