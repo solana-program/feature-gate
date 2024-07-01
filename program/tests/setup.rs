@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 
 use {
+    solana_feature_gate_program::state::StagedFeatures,
     solana_program_test::*,
     solana_sdk::{
         account::{Account, AccountSharedData},
@@ -41,6 +42,30 @@ pub fn setup_active_feature(context: &mut ProgramTestContext, feature_id: &Pubke
                 1, // `Some`
                 45, 0, 0, 0, 0, 0, 0, 0, // Random slot `u64`
             ],
+            owner: solana_feature_gate_program::id(),
+            ..Account::default()
+        }),
+    );
+}
+
+pub fn setup_staged_features_account(
+    context: &mut ProgramTestContext,
+    staged_features_address: &Pubkey,
+    features: &[Pubkey],
+) {
+    let data_len = std::mem::size_of::<StagedFeatures>();
+    let mut data = vec![0; data_len];
+    let state = bytemuck::from_bytes_mut::<StagedFeatures>(&mut data);
+
+    for feature_id in features {
+        state.stage(&feature_id).unwrap();
+    }
+
+    context.set_account(
+        staged_features_address,
+        &AccountSharedData::from(Account {
+            lamports: 100_000_000,
+            data,
             owner: solana_feature_gate_program::id(),
             ..Account::default()
         }),
