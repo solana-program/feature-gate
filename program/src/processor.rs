@@ -1,7 +1,7 @@
 //! Program state processor
 
 use {
-    crate::{error::FeatureGateError, instruction::FeatureGateInstruction},
+    crate::{error::FeatureGateError, instruction::FeatureGateInstruction, state::FeatureBitMask},
     solana_program::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
@@ -16,7 +16,7 @@ use {
 
 /// Processes a [RevokePendingActivation](enum.FeatureGateInstruction.html)
 /// instruction.
-pub fn process_revoke_pending_activation(
+fn process_revoke_pending_activation(
     _program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
@@ -52,13 +52,41 @@ pub fn process_revoke_pending_activation(
     Ok(())
 }
 
-/// Processes an [Instruction](enum.Instruction.html).
+/// Processes a [StageFeatureForActivation](enum.FeatureGateInstruction.html)
+/// instruction.
+fn process_stage_feature_for_activation(
+    _program_id: &Pubkey,
+    _accounts: &[AccountInfo],
+) -> ProgramResult {
+    Ok(())
+}
+
+/// Processes a
+/// [SignalSupportForStagedFeatures](enum.FeatureGateInstruction.html)
+/// instruction.
+fn process_signal_support_for_staged_features(
+    _program_id: &Pubkey,
+    _accounts: &[AccountInfo],
+    _features: FeatureBitMask,
+) -> ProgramResult {
+    Ok(())
+}
+
+/// Processes a [FeatureGateInstruction](enum.FeatureGateInstruction.html).
 pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
     let instruction = FeatureGateInstruction::unpack(input)?;
     match instruction {
         FeatureGateInstruction::RevokePendingActivation => {
             msg!("Instruction: RevokePendingActivation");
             process_revoke_pending_activation(program_id, accounts)
+        }
+        FeatureGateInstruction::StageFeatureForActivation => {
+            msg!("Instruction: StageFeatureForActivation");
+            process_stage_feature_for_activation(program_id, accounts)
+        }
+        FeatureGateInstruction::SignalSupportForStagedFeatures { features } => {
+            msg!("Instruction: SignalSupportForStagedFeatures");
+            process_signal_support_for_staged_features(program_id, accounts, features)
         }
     }
 }
