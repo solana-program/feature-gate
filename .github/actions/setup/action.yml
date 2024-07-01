@@ -32,7 +32,7 @@ runs:
 
     - name: Set env vars
       shell: bash
-      run: pnpm ci:set-env
+      run: pnpm zx ./scripts/ci/set-env.mjs
 
     - name: (Temporary Workaround) Install protoc
       if: ${{ inputs.protoc == 'true' }}
