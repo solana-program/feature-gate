@@ -27,11 +27,15 @@ jobs:
         uses: ./.github/actions/setup
         with:
           node: ${{ env.NODE_VERSION }}
-          solana: ${{ env.SOLANA_VERSION }}
       - name: (Temporary Workaround) Install protoc
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
+      - name: Install Solana
+        uses: metaplex-foundation/actions/install-solana@v1
+        with:
+          version: ${{ env.SOLANA_VERSION }}
+          cache: true
       - name: Cache cargo dependencies
         uses: actions/cache@v4
         with:
@@ -62,11 +66,15 @@ jobs:
         uses: ./.github/actions/setup
         with:
           node: ${{ env.NODE_VERSION }}
-          solana: ${{ env.SOLANA_VERSION }}
       - name: (Temporary Workaround) Install protoc
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
+      - name: Install Solana
+        uses: metaplex-foundation/actions/install-solana@v1
+        with:
+          version: ${{ env.SOLANA_VERSION }}
+          cache: true
       - name: Cache test cargo dependencies
         uses: actions/cache@v4
         with:
@@ -78,129 +86,3 @@ jobs:
             ${{ runner.os }}-cargo-programs
       - name: Test programs
         run: pnpm programs:test --features bpf-entrypoint
-
-  # I'll enable these jobs once the rest of the Kinobi setup is complete.
-  #
-  # generate_idls:
-  #   name: Check IDL generation
-  #   needs: build_programs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup environment
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         node: ${{ env.NODE_VERSION }}
-  #         solana: ${{ env.SOLANA_VERSION }}
-  #     - name: Cache cargo dependencies
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ${{ env.CARGO_CACHE }}
-  #         key: ${{ runner.os }}-cargo-programs-${{ hashFiles('**/Cargo.lock') }}
-  #         restore-keys: ${{ runner.os }}-cargo-programs
-  #     - name: Cache local cargo dependencies
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           .cargo/bin/
-  #           .cargo/registry/index/
-  #           .cargo/registry/cache/
-  #           .cargo/git/db/
-  #         key: ${{ runner.os }}-cargo-local-${{ hashFiles('**/Cargo.lock') }}
-  #         restore-keys: ${{ runner.os }}-cargo-local
-  #     - name: Generate IDLs
-  #       run: pnpm generate:idls
-  #     - name: Ensure working directory is clean
-  #       run: test -z "$(git status --porcelain)"
-
-  # generate_clients:
-  #   name: Check client generation
-  #   needs: build_programs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup environment
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         node: ${{ env.NODE_VERSION }}
-  #         solana: ${{ env.SOLANA_VERSION }}
-  #     - name: Generate clients
-  #       run: pnpm generate:clients
-  #     - name: Ensure working directory is clean
-  #       run: test -z "$(git status --porcelain)"
-
-  # test_js:
-  #   name: Test JS client
-  #   needs: build_programs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup environment
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         node: ${{ env.NODE_VERSION }}
-  #         solana: ${{ env.SOLANA_VERSION }}
-  #     - name: Restore all builds
-  #       uses: actions/cache/restore@v4
-  #       with:
-  #         path: ./**/*.so
-  #         key: ${{ runner.os }}-builds-${{ github.sha }}
-  #     - name: Test JS client
-  #       run: pnpm clients:js:test
-
-  # lint_js:
-  #   name: Lint JS client
-  #   needs: build_programs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup environment
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         node: ${{ env.NODE_VERSION }}
-  #     - name: Lint JS client
-  #       run: pnpm clients:js:lint
-
-  # test_rust:
-  #   name: Test Rust client
-  #   needs: build_programs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup environment
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         node: ${{ env.NODE_VERSION }}
-  #         solana: ${{ env.SOLANA_VERSION }}
-  #     - name: Cache Rust client dependencies
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ${{ env.CARGO_CACHE }}
-  #         key: ${{ runner.os }}-cargo-rust-client-${{ hashFiles('**/Cargo.lock') }}
-  #         restore-keys: ${{ runner.os }}-cargo-rust-client
-  #     - name: Restore all builds
-  #       uses: actions/cache/restore@v4
-  #       with:
-  #         path: ./**/*.so
-  #         key: ${{ runner.os }}-builds-${{ github.sha }}
-  #     - name: Test Rust client
-  #       run: pnpm clients:rust:test
-
-  # lint_rust:
-  #   name: Lint Rust client
-  #   needs: build_programs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup environment
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         node: ${{ env.NODE_VERSION }}
-  #     - name: Lint Rust client
-  #       run: pnpm clients:rust:lint
