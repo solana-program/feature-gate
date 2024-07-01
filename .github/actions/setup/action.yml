@@ -1,23 +1,77 @@
 name: Setup environment
 
 inputs:
+  cargo-cache-key:
+    description: The key to cache cargo dependencies.
+    required: false
+  protoc:
+    description: Whether or not to install protoc (workaround).
+    required: false
   node:
-    description: The Node.js version to install
+    description: The Node.js version to install.
     required: true
+  solana:
+    description: The Solana version to install. Skips if not provided.
+    required: false
 
 runs:
   using: "composite"
   steps:
     - name: Setup pnpm
       uses: pnpm/action-setup@v3
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node }}
         cache: "pnpm"
+
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       shell: bash
+
     - name: Set env vars
       shell: bash
       run: pnpm ci:set-env
+
+    - name: (Temporary Workaround) Install protoc
+      if: ${{ inputs.protoc == 'true' }}
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+
+    - name: Install Solana
+      if: ${{ inputs.solana }}
+      uses: metaplex-foundation/actions/install-solana@v1
+      with:
+        version: ${{ inputs.solana }}
+        cache: true
+    
+    - name: Cache cargo dependencies
+      if: ${{ inputs.cargo-cache-key }}
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-${{ inputs.cargo-cache-key }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-${{ inputs.cargo-cache-key }}
+
+    - name: Cache cargo dev dependencies
+      if: ${{ inputs.cargo-cache-key }}
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-${{ inputs.cargo-cache-key }}-tests-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+            ${{ runner.os }}-${{ inputs.cargo-cache-key }}-tests
+            ${{ runner.os }}-${{ inputs.cargo-cache-key }}

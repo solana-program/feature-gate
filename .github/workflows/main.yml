@@ -9,12 +9,6 @@ on:
 env:
   NODE_VERSION: 18
   SOLANA_VERSION: 1.18.12
-  CARGO_CACHE: |
-    ~/.cargo/bin/
-    ~/.cargo/registry/index/
-    ~/.cargo/registry/cache/
-    ~/.cargo/git/db/
-    target/
 
 jobs:
   build_programs:
@@ -23,33 +17,25 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
+
       - name: Setup environment
         uses: ./.github/actions/setup
         with:
+          cargo-cache-key: cargo-programs
+          protoc: true
           node: ${{ env.NODE_VERSION }}
-      - name: (Temporary Workaround) Install protoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
-      - name: Install Solana
-        uses: metaplex-foundation/actions/install-solana@v1
-        with:
-          version: ${{ env.SOLANA_VERSION }}
-          cache: true
-      - name: Cache cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.CARGO_CACHE }}
-          key: ${{ runner.os }}-cargo-programs-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-programs
+          solana: ${{ env.SOLANA_VERSION }}
+
       - name: Build programs
         run: pnpm programs:build --features bpf-entrypoint
+
       - name: Upload program builds
         uses: actions/upload-artifact@v4
         with:
           name: program-builds
           path: ./target/deploy/*.so
           if-no-files-found: error
+
       - name: Save all builds for clients
         uses: actions/cache/save@v4
         with:
@@ -62,27 +48,14 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
+
       - name: Setup environment
         uses: ./.github/actions/setup
         with:
+          cargo-cache-key: cargo-programs
+          protoc: true
           node: ${{ env.NODE_VERSION }}
-      - name: (Temporary Workaround) Install protoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
-      - name: Install Solana
-        uses: metaplex-foundation/actions/install-solana@v1
-        with:
-          version: ${{ env.SOLANA_VERSION }}
-          cache: true
-      - name: Cache test cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.CARGO_CACHE }}
-          key: ${{ runner.os }}-cargo-program-tests-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-program-tests
-            ${{ runner.os }}-cargo-programs-${{ hashFiles('**/Cargo.lock') }}
-            ${{ runner.os }}-cargo-programs
+          solana: ${{ env.SOLANA_VERSION }}
+
       - name: Test programs
         run: pnpm programs:test --features bpf-entrypoint
