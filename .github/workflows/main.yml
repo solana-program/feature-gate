@@ -28,6 +28,10 @@ jobs:
         with:
           node: ${{ env.NODE_VERSION }}
           solana: ${{ env.SOLANA_VERSION }}
+      - name: (Temporary Workaround) Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
       - name: Cache cargo dependencies
         uses: actions/cache@v4
         with:
@@ -59,6 +63,10 @@ jobs:
         with:
           node: ${{ env.NODE_VERSION }}
           solana: ${{ env.SOLANA_VERSION }}
+      - name: (Temporary Workaround) Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
       - name: Cache test cargo dependencies
         uses: actions/cache@v4
         with:
