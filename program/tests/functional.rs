@@ -1,108 +1,151 @@
 #![cfg(feature = "test-sbf")]
 
+mod setup;
+
 use {
+    setup::{setup, setup_active_feature, setup_pending_feature},
     solana_feature_gate_program::{
         error::FeatureGateError, instruction::revoke_pending_activation,
     },
     solana_program::instruction::InstructionError,
-    solana_program_test::{processor, tokio, ProgramTest, ProgramTestContext},
+    solana_program_test::*,
     solana_sdk::{
-        account::Account as SolanaAccount,
-        feature::{activate_with_lamports, Feature},
+        account::{Account, AccountSharedData},
+        feature::Feature,
+        pubkey::Pubkey,
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
     },
 };
 
-async fn setup_pending_feature(
-    context: &mut ProgramTestContext,
-    feature_keypair: &Keypair,
-    rent_lamports: u64,
-) {
-    let transaction = Transaction::new_signed_with_payer(
-        &activate_with_lamports(
-            &feature_keypair.pubkey(),
-            &context.payer.pubkey(),
-            rent_lamports,
-        ),
-        Some(&context.payer.pubkey()),
-        &[&context.payer, feature_keypair],
-        context.last_blockhash,
-    );
-
-    context
-        .banks_client
-        .process_transaction(transaction)
-        .await
-        .unwrap();
-}
-
 #[tokio::test]
-async fn test_revoke_pending_activation() {
-    let feature_keypair = Keypair::new();
-    let mock_active_feature_keypair = Keypair::new();
+async fn fail_feature_not_signer() {
+    let mut context = setup().start_with_context().await;
 
-    let mut program_test = ProgramTest::new(
-        "solana_feature_gate_program",
-        solana_feature_gate_program::id(),
-        processor!(solana_feature_gate_program::processor::process),
-    );
+    let mut instruction = revoke_pending_activation(&Pubkey::new_unique());
+    instruction.accounts[0].is_signer = false;
 
-    // Add a mock _active_ feature for testing later
-    program_test.add_account(
-        mock_active_feature_keypair.pubkey(),
-        SolanaAccount {
-            lamports: 500_000_000,
-            owner: solana_feature_gate_program::id(),
-            data: vec![
-                1, // `Some()`
-                45, 0, 0, 0, 0, 0, 0, 0, // Random slot `u64`
-            ],
-            ..SolanaAccount::default()
-        },
-    );
-
-    let mut context = program_test.start_with_context().await;
-    let rent = context.banks_client.get_rent().await.unwrap();
-    let rent_lamports = rent.minimum_balance(Feature::size_of()); // For checking account balance later
-
-    setup_pending_feature(&mut context, &feature_keypair, rent_lamports).await;
-
-    // Fail: feature not signer
-    let mut revoke_ix = revoke_pending_activation(&feature_keypair.pubkey());
-    revoke_ix.accounts[0].is_signer = false;
     let transaction = Transaction::new_signed_with_payer(
-        &[revoke_ix],
+        &[instruction],
         Some(&context.payer.pubkey()),
         &[&context.payer],
         context.last_blockhash,
     );
+
     let error = context
         .banks_client
         .process_transaction(transaction)
         .await
         .unwrap_err()
         .unwrap();
+
     assert_eq!(
         error,
         TransactionError::InstructionError(0, InstructionError::MissingRequiredSignature)
     );
+}
 
-    // Fail: feature is already active
+#[tokio::test]
+async fn fail_feature_incorrect_owner() {
+    let feature_keypair = Keypair::new();
+
+    let mut context = setup().start_with_context().await;
+
+    // Set up a feature account with incorrect owner.
+    {
+        context.set_account(
+            &feature_keypair.pubkey(),
+            &AccountSharedData::from(Account {
+                lamports: 100_000_000,
+                data: vec![0; Feature::size_of()],
+                owner: Pubkey::new_unique(), // Incorrect owner.
+                ..Account::default()
+            }),
+        );
+    }
+
     let transaction = Transaction::new_signed_with_payer(
-        &[revoke_pending_activation(
-            &mock_active_feature_keypair.pubkey(),
-        )],
+        &[revoke_pending_activation(&feature_keypair.pubkey())],
         Some(&context.payer.pubkey()),
-        &[&context.payer, &mock_active_feature_keypair],
+        &[&context.payer, &feature_keypair],
         context.last_blockhash,
     );
+
     let error = context
         .banks_client
         .process_transaction(transaction)
         .await
         .unwrap_err()
         .unwrap();
+
+    assert_eq!(
+        error,
+        TransactionError::InstructionError(0, InstructionError::InvalidAccountOwner)
+    );
+}
+
+#[tokio::test]
+async fn fail_feature_invalid_data() {
+    let feature_keypair = Keypair::new();
+
+    let mut context = setup().start_with_context().await;
+
+    // Set up a feature account with invalid data.
+    {
+        context.set_account(
+            &feature_keypair.pubkey(),
+            &AccountSharedData::from(Account {
+                lamports: 100_000_000,
+                data: vec![8; Feature::size_of()],
+                owner: solana_feature_gate_program::id(),
+                ..Account::default()
+            }),
+        );
+    }
+
+    let transaction = Transaction::new_signed_with_payer(
+        &[revoke_pending_activation(&feature_keypair.pubkey())],
+        Some(&context.payer.pubkey()),
+        &[&context.payer, &feature_keypair],
+        context.last_blockhash,
+    );
+
+    let error = context
+        .banks_client
+        .process_transaction(transaction)
+        .await
+        .unwrap_err()
+        .unwrap();
+
+    assert_eq!(
+        error,
+        TransactionError::InstructionError(0, InstructionError::InvalidAccountData)
+    );
+}
+
+#[tokio::test]
+async fn fail_feature_already_activated() {
+    let feature_keypair = Keypair::new();
+
+    let mut context = setup().start_with_context().await;
+
+    // Set up an active feature account.
+    setup_active_feature(&mut context, &feature_keypair.pubkey());
+
+    let transaction = Transaction::new_signed_with_payer(
+        &[revoke_pending_activation(&feature_keypair.pubkey())],
+        Some(&context.payer.pubkey()),
+        &[&context.payer, &feature_keypair],
+        context.last_blockhash,
+    );
+
+    let error = context
+        .banks_client
+        .process_transaction(transaction)
+        .await
+        .unwrap_err()
+        .unwrap();
+
     assert_eq!(
         error,
         TransactionError::InstructionError(
@@ -110,8 +153,17 @@ async fn test_revoke_pending_activation() {
             InstructionError::Custom(FeatureGateError::FeatureAlreadyActivated as u32)
         )
     );
+}
 
-    // Success: Revoke a feature activation
+#[tokio::test]
+async fn success() {
+    let feature_keypair = Keypair::new();
+
+    let mut context = setup().start_with_context().await;
+
+    // Set up a pending feature account.
+    setup_pending_feature(&mut context, &feature_keypair.pubkey());
+
     let transaction = Transaction::new_signed_with_payer(
         &[revoke_pending_activation(&feature_keypair.pubkey())],
         Some(&context.payer.pubkey()),
