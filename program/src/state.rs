@@ -55,6 +55,28 @@ const MAX_FEATURES: usize = 8;
 #[repr(transparent)]
 pub struct FeatureBitMask(pub u8);
 
+impl From<&[bool; MAX_FEATURES]> for FeatureBitMask {
+    fn from(signals: &[bool; MAX_FEATURES]) -> Self {
+        let mut mask = 0;
+        for i in 0..MAX_FEATURES {
+            if signals[MAX_FEATURES - 1 - i] {
+                mask |= 1 << i;
+            }
+        }
+        Self(mask)
+    }
+}
+
+impl From<&FeatureBitMask> for [bool; MAX_FEATURES] {
+    fn from(mask: &FeatureBitMask) -> [bool; MAX_FEATURES] {
+        let mut signals = [false; MAX_FEATURES];
+        for i in 0..MAX_FEATURES {
+            signals[MAX_FEATURES - 1 - i] = mask.0 & (1 << i) != 0;
+        }
+        signals
+    }
+}
+
 /// A Feature ID and its corresponding stake support, as signalled by
 /// validators.
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
@@ -69,6 +91,10 @@ pub struct FeatureStake {
 impl FeatureStake {
     fn is_initialized(&self) -> bool {
         self.feature_id != Pubkey::default()
+    }
+
+    fn add_stake_support(&mut self, stake: u64) {
+        self.stake_support += stake;
     }
 }
 
@@ -95,6 +121,26 @@ impl StagedFeatures {
             return Ok(());
         }
         Err(FeatureGateError::FeatureStageFull.into())
+    }
+
+    /// Add stake support for features given a set of signals.
+    pub fn add_stake_support(
+        &mut self,
+        bitmask: &FeatureBitMask,
+        _total_epoch_stake: u64,
+        vote_account_epoch_stake: u64,
+    ) {
+        <[bool; MAX_FEATURES]>::from(bitmask)
+            .iter()
+            .enumerate()
+            .filter(|(_, signal)| **signal)
+            .for_each(|(i, _)| {
+                if let Some(feature) = self.features.get_mut(i) {
+                    if feature.is_initialized() {
+                        feature.add_stake_support(vote_account_epoch_stake);
+                    }
+                }
+            });
     }
 }
 
@@ -160,5 +206,65 @@ mod tests {
         let mut stage = setup_stage(&staged_features);
         assert_eq!(stage.stage(&feature_id), Ok(()));
         assert_eq!(stage.features[MAX_FEATURES - 1].feature_id, feature_id);
+    }
+
+    fn test_to_from_bitmask(val: u8, signal: [bool; 8]) {
+        let mask = FeatureBitMask(val);
+        assert_eq!(mask.0, val);
+        assert_eq!(<[bool; 8]>::from(&mask), signal);
+        assert_eq!(FeatureBitMask::from(&signal), mask);
+    }
+
+    #[test]
+    fn test_bitmask() {
+        test_to_from_bitmask(
+            0b00000000,
+            [false, false, false, false, false, false, false, false],
+        );
+        test_to_from_bitmask(
+            0b00000001,
+            [false, false, false, false, false, false, false, true],
+        );
+        test_to_from_bitmask(
+            0b00000010,
+            [false, false, false, false, false, false, true, false],
+        );
+        test_to_from_bitmask(
+            0b00000011,
+            [false, false, false, false, false, false, true, true],
+        );
+        test_to_from_bitmask(
+            0b01010101,
+            [false, true, false, true, false, true, false, true],
+        );
+        test_to_from_bitmask(
+            0b10001101,
+            [true, false, false, false, true, true, false, true],
+        );
+        test_to_from_bitmask(0b11111111, [true, true, true, true, true, true, true, true]);
+    }
+
+    #[test]
+    fn test_add_stake_support() {
+        let features = vec![Pubkey::new_unique(); MAX_FEATURES];
+        let mut stage = setup_stage(&features);
+
+        stage.add_stake_support(&FeatureBitMask(0b00000001), 0, 100_000_000);
+        assert_eq!(stage.features[7].stake_support, 100_000_000);
+
+        stage.add_stake_support(&FeatureBitMask(0b00000001), 0, 100_000_000);
+        assert_eq!(stage.features[7].stake_support, 200_000_000);
+
+        stage.add_stake_support(&FeatureBitMask(0b01010101), 0, 100_000_000);
+        assert_eq!(stage.features[1].stake_support, 100_000_000);
+        assert_eq!(stage.features[3].stake_support, 100_000_000);
+        assert_eq!(stage.features[5].stake_support, 100_000_000);
+        assert_eq!(stage.features[7].stake_support, 300_000_000);
+
+        stage.add_stake_support(&FeatureBitMask(0b01010100), 0, 100_000_000);
+        assert_eq!(stage.features[1].stake_support, 200_000_000);
+        assert_eq!(stage.features[3].stake_support, 200_000_000);
+        assert_eq!(stage.features[5].stake_support, 200_000_000);
+        assert_eq!(stage.features[7].stake_support, 300_000_000);
     }
 }

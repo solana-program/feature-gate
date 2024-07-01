@@ -13,6 +13,7 @@ use {
         account_info::{next_account_info, AccountInfo},
         clock::Clock,
         entrypoint::ProgramResult,
+        epoch_stake::{get_epoch_stake_for_vote_account, get_epoch_total_stake},
         feature::Feature,
         incinerator, msg,
         program::{invoke, invoke_signed},
@@ -156,9 +157,43 @@ fn process_stage_feature_for_activation(
 /// instruction.
 fn process_signal_support_for_staged_features(
     _program_id: &Pubkey,
-    _accounts: &[AccountInfo],
-    _features: FeatureBitMask,
+    accounts: &[AccountInfo],
+    features: FeatureBitMask,
 ) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+
+    let staged_features_info = next_account_info(account_info_iter)?;
+    let vote_account_info = next_account_info(account_info_iter)?;
+
+    // Ensure the vote account is a signer.
+    if !vote_account_info.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // Load the clock sysvar to get the _current_ epoch.
+    let clock = <Clock as Sysvar>::get()?;
+    let current_epoch = clock.epoch;
+
+    // Ensure the staged features address is the correct address derived
+    // from the _current_ epoch.
+    if !staged_features_info
+        .key
+        .eq(&get_staged_features_address(&current_epoch))
+    {
+        return Err(FeatureGateError::IncorrectStagedFeaturesAddress.into());
+    }
+
+    // Get the total epoch stake and the provided vote account's epoch stake.
+    let total_epoch_stake = get_epoch_total_stake();
+    let vote_account_epoch_stake = get_epoch_stake_for_vote_account(vote_account_info.key);
+
+    // Add the vote account's stake to the staged features for the features
+    // supported by the bitmask.
+    let mut staged_features_data = staged_features_info.try_borrow_mut_data()?;
+    bytemuck::try_from_bytes_mut::<StagedFeatures>(&mut staged_features_data)
+        .map_err(|_| ProgramError::InvalidAccountData)?
+        .add_stake_support(&features, total_epoch_stake, vote_account_epoch_stake);
+
     Ok(())
 }
 
