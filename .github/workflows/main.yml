@@ -11,9 +11,64 @@ env:
   SOLANA_VERSION: 1.18.12
 
 jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        library: [programs, client-rust, client-js]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+        with:
+          node: ${{ env.NODE_VERSION }}
+          rustfmt: true
+
+      - name: Format ${{ matrix.library }}
+        run: |
+          if [ "${{ matrix.library }}" == "programs" ]; then
+            pnpm programs:format -- --check
+          elif [ "${{ matrix.library }}" == "client-rust" ]; then
+            pnpm clients:rust:format -- --check
+          elif [ "${{ matrix.library }}" == "client-js" ]; then
+            pnpm clients:js:format
+          fi
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: format
+    strategy:
+      matrix:
+        library: [programs, client-rust, client-js]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+        with:
+          clippy: true
+          node: ${{ env.NODE_VERSION }}
+          protoc: true
+
+      - name: Lint ${{ matrix.library }}
+        run: |
+          if [ "${{ matrix.library }}" == "programs" ]; then
+            pnpm programs:lint -Zunstable-options --features bpf-entrypoint,test-sbf -- --deny=warnings --deny=clippy::arithmetic_side_effects
+          elif [ "${{ matrix.library }}" == "client-rust" ]; then
+            pnpm clients:rust:lint -Zunstable-options -- --deny=warnings
+          elif [ "${{ matrix.library }}" == "client-js" ]; then
+            pnpm clients:js:lint
+          fi
+
   build_programs:
     name: Build programs
     runs-on: ubuntu-latest
+    needs: lint
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -45,6 +100,7 @@ jobs:
   test_programs:
     name: Test programs
     runs-on: ubuntu-latest
+    needs: build_programs
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
