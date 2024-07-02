@@ -2,6 +2,7 @@
 
 use {
     num_enum::{IntoPrimitive, TryFromPrimitive},
+    shank::ShankInstruction,
     solana_program::{
         incinerator,
         instruction::{AccountMeta, Instruction},
@@ -12,7 +13,8 @@ use {
 };
 
 /// Feature Gate program instructions
-#[derive(Clone, Debug, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[rustfmt::skip]
+#[derive(Clone, Debug, PartialEq, IntoPrimitive, ShankInstruction, TryFromPrimitive)]
 #[repr(u8)]
 pub enum FeatureGateInstruction {
     /// Revoke a pending feature activation.
@@ -30,6 +32,24 @@ pub enum FeatureGateInstruction {
     ///   0. `[w+s]`    Feature account
     ///   1. `[w]`      Incinerator
     ///   2. `[ ]`      System program
+    #[account(
+        0,
+        writable,
+        signer,
+        name = "feature",
+        description = "The feature account to revoke"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "incinerator",
+        description = "The incinerator account"
+    )]
+    #[account(
+        2,
+        name = "system_program",
+        description = "The system program"
+    )]
     RevokePendingActivation,
 }
 impl FeatureGateInstruction {
