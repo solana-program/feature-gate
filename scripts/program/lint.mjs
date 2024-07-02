@@ -10,7 +10,7 @@ import {
 // Lint the programs using clippy.
 await Promise.all(
   getProgramFolders().map(async (folder) => {
-    await $`cd ${path.join(workingDirectory, folder)}`.quiet();
-    await $`cargo ${getToolchainArg(getClippyToolchain())} clippy ${process.argv.slice(3)}`;
+    const manifestPath = path.join(workingDirectory, folder, 'Cargo.toml');
+    await $`cargo ${getToolchainArg(getClippyToolchain())} clippy --manifest-path ${manifestPath} ${process.argv.slice(3)}`;
   })
 );

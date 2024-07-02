@@ -3,5 +3,5 @@ import 'zx/globals';
 import { getClippyToolchain, getToolchainArg, workingDirectory } from '../utils.mjs';
 
 // Check the client using Clippy.
-cd(path.join(workingDirectory, 'clients', 'rust'));
-await $`cargo ${getToolchainArg(getClippyToolchain())} clippy ${process.argv.slice(3)}`;
+const manifestPath = path.join(workingDirectory, 'clients', 'rust', 'Cargo.toml');
+await $`cargo ${getToolchainArg(getClippyToolchain())} clippy --manifest-path ${manifestPath} ${process.argv.slice(3)}`;
