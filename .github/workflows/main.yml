@@ -96,6 +96,50 @@ jobs:
         with:
           path: ./**/*.so
           key: ${{ runner.os }}-builds-${{ github.sha }}
+  
+  generate_idls:
+    name: Check IDL generation
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+        with:
+          cargo-cache-key: cargo-programs
+          node: ${{ env.NODE_VERSION }}
+
+      - name: Generate IDLs
+        run: pnpm generate:idls
+
+      - name: Ensure working directory is clean
+        run: |
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+  
+  generate_clients:
+    name: Check client generation
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+        with:
+          node: ${{ env.NODE_VERSION }}
+          rustfmt: true
+
+      - name: Generate clients
+        run: pnpm generate:clients
+
+      - name: Ensure working directory is clean
+        run: |
+          git status --porcelain
+          test -z "$(git status --porcelain)"
 
   test_programs:
     name: Test programs
