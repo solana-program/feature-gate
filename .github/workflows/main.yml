@@ -12,7 +12,7 @@ env:
 
 jobs:
   format_and_lint:
-    name: Format & Lint
+    name: Format & lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -81,8 +81,8 @@ jobs:
           path: ./**/*.so
           key: ${{ runner.os }}-builds-${{ github.sha }}
   
-  generate_idls:
-    name: Check IDL generation
+  check_generation:
+    name: Check IDL & client generation
     runs-on: ubuntu-latest
     needs: format_and_lint
     steps:
@@ -94,41 +94,24 @@ jobs:
         with:
           cargo-cache-key: cargo-programs
           node: ${{ env.NODE_VERSION }}
-
-      - name: Generate IDLs
-        run: pnpm generate:idls
-
-      - name: Ensure working directory is clean
-        run: |
-          git status --porcelain
-          test -z "$(git status --porcelain)"
-  
-  generate_clients:
-    name: Check client generation
-    runs-on: ubuntu-latest
-    needs: format_and_lint
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup
-        with:
-          node: ${{ env.NODE_VERSION }}
           rustfmt: true
 
-      - name: Generate clients
-        run: pnpm generate:clients
-
-      - name: Ensure working directory is clean
+      - name: Generate IDLs
         run: |
+          pnpm generate:idls
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+      
+      - name: Generate clients
+        run: |
+          pnpm generate:clients
           git status --porcelain
           test -z "$(git status --porcelain)"
   
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: build_programs
+    needs: [build_programs, check_generation]
     strategy:
       matrix:
         library: [programs, client-rust, client-js]
