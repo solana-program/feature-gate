@@ -90,3 +90,9 @@ export function getClippyToolchain(folder) {
 export function getRustfmtToolchain(folder) {
   return getCargoMetadata(folder).scripts?.rustfmt?.toolchain?.channel;
 }
+
+export function processFormatAndLintArgs() {
+  const args = process.argv.slice(3);
+  const fix = args[0] === '--fix';
+  return { fix, args: fix ? args.slice(1) : args };
+}

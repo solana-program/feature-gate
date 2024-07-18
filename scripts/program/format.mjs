@@ -5,12 +5,21 @@ import {
   getRustfmtToolchain,
   getProgramFolders,
   getToolchainArg,
+  processFormatAndLintArgs,
 } from '../utils.mjs';
+
+const { fix, args } = processFormatAndLintArgs();
+const rustFmtArgs = args;
 
 // Format the programs.
 await Promise.all(
-  getProgramFolders().map(async (folder) => {
+  getProgramFolders().map(async (folder) => {    
     const manifestPath = path.join(workingDirectory, folder, 'Cargo.toml');
-    await $`cargo ${getToolchainArg(getRustfmtToolchain())} fmt --manifest-path ${manifestPath} ${process.argv.slice(3)}`;
+
+    if (fix) {
+      await $`cargo ${getToolchainArg(getRustfmtToolchain())} fmt --manifest-path ${manifestPath} -- ${rustFmtArgs}`;
+    } else {
+      await $`cargo ${getToolchainArg(getRustfmtToolchain())} fmt --manifest-path ${manifestPath} -- --check ${rustFmtArgs}`;
+    }
   })
 );

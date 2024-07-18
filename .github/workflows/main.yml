@@ -27,10 +27,10 @@ jobs:
           protoc: true
 
       - name: Format Programs
-        run: pnpm programs:format -- --check
+        run: pnpm programs:format
       
       - name: Lint Programs
-        run: pnpm programs:lint -Zunstable-options --features bpf-entrypoint,test-sbf -- --deny=warnings --deny=clippy::arithmetic_side_effects
+        run: pnpm programs:lint
   
   format_and_lint_client_rust:
     name: Format & Lint Client Rust
@@ -48,10 +48,10 @@ jobs:
           protoc: true
 
       - name: Format Client Rust
-        run: pnpm clients:rust:format -- --check
+        run: pnpm clients:rust:format
       
       - name: Lint Client Rust
-        run: pnpm clients:rust:lint -Zunstable-options -- --deny=warnings
+        run: pnpm clients:rust:lint
   
   format_and_lint_client_js:
     name: Format & Lint Client JS
@@ -88,7 +88,7 @@ jobs:
           solana: ${{ env.SOLANA_VERSION }}
 
       - name: Build Programs
-        run: pnpm programs:build --features bpf-entrypoint
+        run: pnpm programs:build
 
       - name: Upload Program Builds
         uses: actions/upload-artifact@v4
@@ -120,7 +120,7 @@ jobs:
           solana: ${{ env.SOLANA_VERSION }}
 
       - name: Test Programs
-        run: pnpm programs:test --features bpf-entrypoint
+        run: pnpm programs:test
   
   generate_idls:
     name: Check IDL Generation
