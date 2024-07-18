@@ -5,11 +5,9 @@ import { workingDirectory, getProgramFolders } from '../utils.mjs';
 // Save external programs binaries to the output directory.
 import './dump.mjs';
 
-const buildArgs = [
-  '--features',
-  'bpf-entrypoint',
-  ...process.argv.slice(3),
-];
+// Configure additional build args here, ie:
+// ['--arg1', '--arg2', ...process.argv.slice(3)]
+const buildArgs = process.argv.slice(3);
 
 // Build the programs.
 await Promise.all(

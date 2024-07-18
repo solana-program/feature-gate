@@ -8,12 +8,9 @@ import {
 } from '../utils.mjs';
 
 const { fix, args } = processFormatAndLintArgs();
-const clippyArgs = [
-  '-Zunstable-options',
-  '--',
-  '--deny=warnings',
-  ...args
-];
+// Configure additional clippy args here, ie:
+// ['--arg1', '--arg2', ...args]
+const clippyArgs = args;
 
 // Check the client using Clippy.
 const manifestPath = path.join(workingDirectory, 'clients', 'rust', 'Cargo.toml');

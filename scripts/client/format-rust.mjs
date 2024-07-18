@@ -8,6 +8,8 @@ import {
 } from '../utils.mjs';
 
 const { fix, args } = processFormatAndLintArgs();
+// Configure additional rustfmt args here, ie:
+// ['--arg1', '--arg2', ...args]
 const rustFmtArgs = args;
 
 const manifestPath = path.join(workingDirectory, 'clients', 'rust', 'Cargo.toml');

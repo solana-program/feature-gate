@@ -9,15 +9,9 @@ import {
 } from '../utils.mjs';
 
 const { fix, args } = processFormatAndLintArgs();
-const clippyArgs = [
-  '-Zunstable-options',
-  '--features',
-  'bpf-entrypoint,test-sbf',
-  '--',
-  '--deny=warnings',
-  '--deny=clippy::arithmetic_side_effects',
-  ...args
-];
+// Configure additional clippy args here, ie:
+// ['--arg1', '--arg2', ...args]
+const clippyArgs = args;
 
 // Lint the programs using clippy.
 await Promise.all(
