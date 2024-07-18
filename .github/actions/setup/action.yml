@@ -5,16 +5,16 @@ inputs:
     description: The key to cache cargo dependencies. Skips if not provided.
     required: false
   clippy:
-    description: Install Clippy (true/false).
+    description: Install Clippy (true/false). Skips if not provided.
     required: false
   node:
-    description: The Node.js version to install.
+    description: The Node.js version to install. Required.
     required: true
   protoc:
     description: Whether or not to install protoc (workaround). Skips if not provided.
     required: false
   rustfmt:
-    description: Install Rustfmt (true/false).
+    description: Install Rustfmt (true/false). Skips if not provided.
     required: false
   solana:
     description: The Solana version to install. Skips if not provided.
@@ -32,15 +32,15 @@ runs:
         node-version: ${{ inputs.node }}
         cache: "pnpm"
 
-    - name: Install dependencies
+    - name: Install Dependencies
       run: pnpm install --frozen-lockfile
       shell: bash
 
-    - name: Set env vars
+    - name: Set Environment Variables
       shell: bash
       run: pnpm zx ./scripts/ci/set-env.mjs
 
-    - name: (Temporary Workaround) Install protoc
+    - name: (Temporary Workaround) Install Protobuf Compiler
       if: ${{ inputs.protoc == 'true' }}
       shell: bash
       run: |
@@ -68,7 +68,7 @@ runs:
         version: ${{ inputs.solana }}
         cache: true
     
-    - name: Cache cargo dependencies
+    - name: Cache Cargo Dependencies
       if: ${{ inputs.cargo-cache-key }}
       uses: actions/cache@v4
       with:
@@ -81,7 +81,7 @@ runs:
         key: ${{ runner.os }}-${{ inputs.cargo-cache-key }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-${{ inputs.cargo-cache-key }}
 
-    - name: Cache cargo dev dependencies
+    - name: Cache Cargo Dev-Dependencies
       if: ${{ inputs.cargo-cache-key }}
       uses: actions/cache@v4
       with:
