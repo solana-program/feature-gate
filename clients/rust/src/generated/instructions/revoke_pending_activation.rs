@@ -3,8 +3,10 @@
 //! to add features, then rerun kinobi to update it.
 //!
 //! <https://github.com/kinobi-so/kinobi>
+//!
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::BorshDeserialize;
+use borsh::BorshSerialize;
 
 /// Accounts.
 pub struct RevokePendingActivation {
@@ -74,8 +76,7 @@ impl Default for RevokePendingActivationInstructionData {
 ///
 ///   0. `[writable, signer]` feature
 ///   1. `[writable]` incinerator
-///   2. `[optional]` system_program (default to
-///      `11111111111111111111111111111111`)
+///   2. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Clone, Debug, Default)]
 pub struct RevokePendingActivationBuilder {
     feature: Option<solana_program::pubkey::Pubkey>,
@@ -317,9 +318,8 @@ impl<'a, 'b> RevokePendingActivationCpiBuilder<'a, 'b> {
     }
     /// Add additional accounts to the instruction.
     ///
-    /// Each account is represented by a tuple of the `AccountInfo`, a `bool`
-    /// indicating whether the account is writable or not, and a `bool`
-    /// indicating whether the account is a signer or not.
+    /// Each account is represented by a tuple of the `AccountInfo`, a `bool` indicating whether the account is writable or not,
+    /// and a `bool` indicating whether the account is a signer or not.
     #[inline(always)]
     pub fn add_remaining_accounts(
         &mut self,
