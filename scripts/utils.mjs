@@ -13,15 +13,20 @@ export function getAllProgramIdls() {
 }
 
 export function getExternalProgramOutputDir() {
-  const config =
-    getCargo().workspace?.metadata?.solana?.['external-programs-output'];
+  const config = getCargoMetadata()?.solana?.['external-programs-output'];
   return path.join(workingDirectory, config ?? 'target/deploy');
 }
 
 export function getExternalProgramAddresses() {
   const addresses = getProgramFolders().flatMap(
-    (folder) =>
-      getCargo(folder).package?.metadata?.solana?.['program-dependencies'] ?? []
+    (folder) => getCargoMetadata(folder)?.solana?.['program-dependencies'] ?? []
+  );
+  return Array.from(new Set(addresses));
+}
+
+export function getExternalAccountAddresses() {
+  const addresses = getProgramFolders().flatMap(
+    (folder) => getCargoMetadata(folder)?.solana?.['account-dependencies'] ?? []
   );
   return Array.from(new Set(addresses));
 }
@@ -74,25 +79,48 @@ export function getCargo(folder) {
   );
 }
 
-export function getToolchainArg(channel) {
-  return channel ? `+${channel}` : '';
-}
-
 export function getCargoMetadata(folder) {
   const cargo = getCargo(folder);
   return folder ? cargo?.package?.metadata : cargo?.workspace?.metadata;
 }
 
-export function getClippyToolchain(folder) {
-  return getCargoMetadata(folder).scripts?.clippy?.toolchain?.channel;
+export function getSolanaVersion() {
+  return getCargoMetadata()?.cli?.solana;
 }
 
-export function getRustfmtToolchain(folder) {
-  return getCargoMetadata(folder).scripts?.rustfmt?.toolchain?.channel;
+export function getToolchain(operation) {
+  return getCargoMetadata()?.toolchains?.[operation];
 }
 
-export function processFormatAndLintArgs() {
-  const args = process.argv.slice(3);
-  const fix = args[0] === '--fix';
-  return { fix, args: fix ? args.slice(1) : args };
+export function getToolchainArgument(operation) {
+  const channel = getToolchain(operation);
+  return channel ? `+${channel}` : '';
+}
+
+export function cliArguments() {
+  return process.argv.slice(3);
+}
+
+export function popArgument(args, arg) {
+  const index = args.indexOf(arg);
+  if (index >= 0) {
+    args.splice(index, 1);
+  }
+  return index >= 0;
+}
+
+export function partitionArguments(args, delimiter) {
+  const index = args.indexOf(delimiter);
+  return index >= 0
+    ? [args.slice(0, index), args.slice(index + 1)]
+    : [args, []];
+}
+
+export async function getInstalledSolanaVersion() {
+  try {
+    const { stdout } = await $`solana --version`.quiet();
+    return stdout.match(/(\d+\.\d+\.\d+)/)?.[1];
+  } catch (error) {
+    return '';
+  }
 }

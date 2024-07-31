@@ -1,13 +1,17 @@
 #!/usr/bin/env zx
 import 'zx/globals';
-import { workingDirectory, getProgramFolders } from '../utils.mjs';
+import {
+  cliArguments,
+  getProgramFolders,
+  workingDirectory,
+} from '../utils.mjs';
 
 // Save external programs binaries to the output directory.
 import './dump.mjs';
 
-// Configure additional build args here, ie:
-// ['--arg1', '--arg2', ...process.argv.slice(3)]
-const buildArgs = process.argv.slice(3);
+// Configure additional arguments here, e.g.:
+// ['--arg1', '--arg2', ...cliArguments()]
+const buildArgs = cliArguments();
 
 // Build the programs.
 await Promise.all(
