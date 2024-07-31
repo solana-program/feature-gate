@@ -12,8 +12,10 @@
     "validator:start": "zx ./scripts/start-validator.mjs",
     "validator:restart": "pnpm validator:start --restart",
     "validator:stop": "zx ./scripts/stop-validator.mjs",
+    "clients:js:format": "zx ./scripts/client/format-js.mjs",
     "clients:js:lint": "zx ./scripts/client/lint-js.mjs",
     "clients:js:test": "zx ./scripts/client/test-js.mjs",
+    "clients:rust:format": "zx ./scripts/client/format-rust.mjs",
     "clients:rust:lint": "zx ./scripts/client/lint-rust.mjs",
     "clients:rust:test": "zx ./scripts/client/test-rust.mjs"
   },

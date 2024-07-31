@@ -1,9 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["program"]
+members = [
+    "clients/rust",
+    "program",
+]
 
 [workspace.metadata.scripts.rustfmt.toolchain]
-channel = "nightly-2023-10-05"
+channel = "stable"
 
 [workspace.metadata.scripts.clippy.toolchain]
-channel = "nightly-2023-10-05"
+channel = "stable"

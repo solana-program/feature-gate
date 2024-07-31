@@ -1,0 +1,46 @@
+{
+  "version": "0.1.0",
+  "name": "solana_feature_gate_program",
+  "instructions": [
+    {
+      "name": "RevokePendingActivation",
+      "accounts": [
+        {
+          "name": "feature",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The feature account to revoke"
+          ]
+        },
+        {
+          "name": "incinerator",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The incinerator account"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The system program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "Feature111111111111111111111111111111111111",
+    "binaryVersion": "0.4.2",
+    "libVersion": "0.4.2"
+  }
+}
