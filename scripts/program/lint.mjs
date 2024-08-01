@@ -1,17 +1,27 @@
 #!/usr/bin/env zx
 import 'zx/globals';
 import {
-  workingDirectory,
-  getClippyToolchain,
+  cliArguments,
   getProgramFolders,
-  getToolchainArg,
-  processFormatAndLintArgs,
+  getToolchainArgument,
+  popArgument,
+  workingDirectory,
 } from '../utils.mjs';
 
-const { fix, args } = processFormatAndLintArgs();
-// Configure additional clippy args here, ie:
-// ['--arg1', '--arg2', ...args]
-const clippyArgs = args;
+// Configure additional arguments here, e.g.:
+// ['--arg1', '--arg2', ...cliArguments()]
+const lintArgs = [
+  '-Zunstable-options',
+  '--features',
+  'bpf-entrypoint,test-sbf',
+  '--',
+  '--deny=warnings',
+  '--deny=clippy::arithmetic_side_effects',
+  ...cliArguments()
+];
+
+const fix = popArgument(lintArgs, '--fix');
+const toolchain = getToolchainArgument('lint');
 
 // Lint the programs using clippy.
 await Promise.all(
@@ -19,9 +29,9 @@ await Promise.all(
     const manifestPath = path.join(workingDirectory, folder, 'Cargo.toml');
 
     if (fix) {
-      await $`cargo ${getToolchainArg(getClippyToolchain())} clippy --manifest-path ${manifestPath} --fix ${clippyArgs}`;
+      await $`cargo ${toolchain} clippy --manifest-path ${manifestPath} --fix ${lintArgs}`;
     } else {
-      await $`cargo ${getToolchainArg(getClippyToolchain())} clippy --manifest-path ${manifestPath} ${clippyArgs}`;
+      await $`cargo ${toolchain} clippy --manifest-path ${manifestPath} ${lintArgs}`;
     }
   })
 );

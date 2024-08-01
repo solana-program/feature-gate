@@ -1,22 +1,30 @@
 #!/usr/bin/env zx
 import 'zx/globals';
 import {
-    getRustfmtToolchain,
-    getToolchainArg,
-    processFormatAndLintArgs,
-    workingDirectory,
+  cliArguments,
+  getToolchainArgument,
+  partitionArguments,
+  popArgument,
+  workingDirectory,
 } from '../utils.mjs';
 
-const { fix, args } = processFormatAndLintArgs();
-// Configure additional rustfmt args here, ie:
-// ['--arg1', '--arg2', ...args]
-const rustFmtArgs = args;
+// Configure additional arguments here, e.g.:
+// ['--arg1', '--arg2', ...cliArguments()]
+const formatArgs = cliArguments();
 
-const manifestPath = path.join(workingDirectory, 'clients', 'rust', 'Cargo.toml');
+const fix = popArgument(formatArgs, '--fix');
+const [cargoArgs, fmtArgs] = partitionArguments(formatArgs, '--');
+const toolchain = getToolchainArgument('format');
+const manifestPath = path.join(
+  workingDirectory,
+  'clients',
+  'rust',
+  'Cargo.toml'
+);
 
 // Format the client.
 if (fix) {
-    await $`cargo ${getToolchainArg(getRustfmtToolchain())} fmt --manifest-path ${manifestPath} -- ${rustFmtArgs}`;
+  await $`cargo ${toolchain} fmt --manifest-path ${manifestPath} ${cargoArgs} -- ${fmtArgs}`;
 } else {
-    await $`cargo ${getToolchainArg(getRustfmtToolchain())} fmt --manifest-path ${manifestPath} -- --check ${rustFmtArgs}`;
+  await $`cargo ${toolchain} fmt --manifest-path ${manifestPath} ${cargoArgs} -- --check ${fmtArgs}`;
 }

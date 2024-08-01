@@ -27,11 +27,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from '@solana/web3.js';
-import { SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS } from '../programs';
+import { SOLANA_FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
 import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
 export type RevokePendingActivationInstruction<
-  TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS,
+  TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
   TAccountFeature extends string | IAccountMeta<string> = string,
   TAccountIncinerator extends string | IAccountMeta<string> = string,
   TAccountSystemProgram extends
@@ -105,13 +105,13 @@ export function getRevokePendingActivationInstruction<
     TAccountSystemProgram
   >
 ): RevokePendingActivationInstruction<
-  typeof SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS,
+  typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
   TAccountFeature,
   TAccountIncinerator,
   TAccountSystemProgram
 > {
   // Program address.
-  const programAddress = SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS;
+  const programAddress = SOLANA_FEATURE_GATE_PROGRAM_ADDRESS;
 
   // Original accounts.
   const originalAccounts = {
@@ -140,7 +140,7 @@ export function getRevokePendingActivationInstruction<
     programAddress,
     data: getRevokePendingActivationInstructionDataEncoder().encode({}),
   } as RevokePendingActivationInstruction<
-    typeof SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS,
+    typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
     TAccountFeature,
     TAccountIncinerator,
     TAccountSystemProgram
@@ -150,7 +150,7 @@ export function getRevokePendingActivationInstruction<
 }
 
 export type ParsedRevokePendingActivationInstruction<
-  TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS,
+  TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;

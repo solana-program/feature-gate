@@ -1,11 +1,6 @@
 #!/usr/bin/env zx
-import {
-    getRustfmtToolchain,
-    getClippyToolchain,
-} from '../utils.mjs';
+import { getSolanaVersion, getToolchain } from '../utils.mjs';
 
-const rustfmtToolchain = getRustfmtToolchain();
-const clippyToolchain = getClippyToolchain();
-
-await $`echo "RUSTFMT_NIGHTLY_VERSION=${rustfmtToolchain}" >> $GITHUB_ENV`;
-await $`echo "CLIPPY_NIGHTLY_VERSION=${clippyToolchain}" >> $GITHUB_ENV`;
+await $`echo "SOLANA_VERSION=${getSolanaVersion()}" >> $GITHUB_ENV`;
+await $`echo "TOOLCHAIN_FORMAT=${getToolchain('format')}" >> $GITHUB_ENV`;
+await $`echo "TOOLCHAIN_LINT=${getToolchain('lint')}" >> $GITHUB_ENV`;
