@@ -17,7 +17,7 @@ const lintArgs = [
 ];
 
 const fix = popArgument(lintArgs, '--fix');
-const toolchain = getToolchainArgument('format');
+const toolchain = getToolchainArgument('lint');
 const manifestPath = path.join(
   workingDirectory,
   'clients',

@@ -1,6 +1,6 @@
 {
   "name": "@solana-program/feature-gate",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "JavaScript client for the Feature Gate program",
   "sideEffects": false,
   "module": "./dist/src/index.mjs",
