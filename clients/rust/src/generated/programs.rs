@@ -6,6 +6,5 @@
 
 use solana_program::{pubkey, pubkey::Pubkey};
 
-/// `solana_feature_gate_program` program ID.
-pub const SOLANA_FEATURE_GATE_PROGRAM_ID: Pubkey =
-    pubkey!("Feature111111111111111111111111111111111111");
+/// `solana_feature_gate` program ID.
+pub const SOLANA_FEATURE_GATE_ID: Pubkey = pubkey!("Feature111111111111111111111111111111111111");

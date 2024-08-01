@@ -44,7 +44,7 @@ impl RevokePendingActivation {
             .unwrap();
 
         solana_program::instruction::Instruction {
-            program_id: crate::SOLANA_FEATURE_GATE_PROGRAM_ID,
+            program_id: crate::SOLANA_FEATURE_GATE_ID,
             accounts,
             data,
         }
@@ -231,7 +231,7 @@ impl<'a, 'b> RevokePendingActivationCpi<'a, 'b> {
             .unwrap();
 
         let instruction = solana_program::instruction::Instruction {
-            program_id: crate::SOLANA_FEATURE_GATE_PROGRAM_ID,
+            program_id: crate::SOLANA_FEATURE_GATE_ID,
             accounts,
             data,
         };

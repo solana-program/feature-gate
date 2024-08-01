@@ -14,27 +14,27 @@ import {
 } from '@solana/web3.js';
 import { type ParsedRevokePendingActivationInstruction } from '../instructions';
 
-export const SOLANA_FEATURE_GATE_PROGRAM_PROGRAM_ADDRESS =
+export const SOLANA_FEATURE_GATE_PROGRAM_ADDRESS =
   'Feature111111111111111111111111111111111111' as Address<'Feature111111111111111111111111111111111111'>;
 
-export enum SolanaFeatureGateProgramInstruction {
+export enum SolanaFeatureGateInstruction {
   RevokePendingActivation,
 }
 
-export function identifySolanaFeatureGateProgramInstruction(
+export function identifySolanaFeatureGateInstruction(
   instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array
-): SolanaFeatureGateProgramInstruction {
+): SolanaFeatureGateInstruction {
   const data = 'data' in instruction ? instruction.data : instruction;
   if (containsBytes(data, getU8Encoder().encode(0), 0)) {
-    return SolanaFeatureGateProgramInstruction.RevokePendingActivation;
+    return SolanaFeatureGateInstruction.RevokePendingActivation;
   }
   throw new Error(
-    'The provided instruction could not be identified as a solanaFeatureGateProgram instruction.'
+    'The provided instruction could not be identified as a solanaFeatureGate instruction.'
   );
 }
 
-export type ParsedSolanaFeatureGateProgramInstruction<
+export type ParsedSolanaFeatureGateInstruction<
   TProgram extends string = 'Feature111111111111111111111111111111111111',
 > = {
-  instructionType: SolanaFeatureGateProgramInstruction.RevokePendingActivation;
+  instructionType: SolanaFeatureGateInstruction.RevokePendingActivation;
 } & ParsedRevokePendingActivationInstruction<TProgram>;
