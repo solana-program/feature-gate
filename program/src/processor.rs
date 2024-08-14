@@ -4,12 +4,17 @@ use {
     crate::{
         error::FeatureGateError,
         instruction::FeatureGateInstruction,
-        state::{get_staged_features_address, FeatureBitMask, StagedFeatures},
+        state::{
+            get_staged_features_address, get_validator_support_signal_address, FeatureBitMask,
+            StagedFeatures, ValidatorSupportSignal,
+        },
     },
+    bytemuck::Pod,
     solana_program::{
         account_info::{next_account_info, AccountInfo},
         clock::Clock,
         entrypoint::ProgramResult,
+        epoch_stake::get_epoch_stake_for_vote_account,
         feature::Feature,
         incinerator, msg,
         program::invoke,
@@ -17,6 +22,7 @@ use {
         pubkey::Pubkey,
         system_instruction, system_program,
         sysvar::Sysvar,
+        vote::state::VoteStateVersions,
     },
 };
 
@@ -25,6 +31,10 @@ const STAGE_AUTHORITY_ADDRESS: Pubkey = Pubkey::new_from_array([
     59, 106, 39, 188, 206, 182, 164, 45, 98, 163, 168, 208, 42, 111, 13, 115, 101, 50, 21, 119, 29,
     226, 67, 166, 58, 192, 72, 161, 139, 89, 218, 41,
 ]);
+
+fn unpack_pod_mut<P: Pod>(data: &mut [u8]) -> Result<&mut P, ProgramError> {
+    bytemuck::try_from_bytes_mut(data).map_err(|_| ProgramError::InvalidAccountData)
+}
 
 /// Processes a [RevokePendingActivation](enum.FeatureGateInstruction.html)
 /// instruction.
@@ -110,9 +120,8 @@ fn process_stage_feature_for_activation(
     // Stage the feature. The `stage` method will ensure the feature is not
     // already staged.
     let mut staged_features_data = staged_features_info.try_borrow_mut_data()?;
-    bytemuck::try_from_bytes_mut::<StagedFeatures>(&mut staged_features_data)
-        .map_err(|_| ProgramError::InvalidAccountData)
-        .and_then(|staged_features| staged_features.stage(feature_info.key))?;
+    unpack_pod_mut::<StagedFeatures>(&mut staged_features_data)
+        .and_then(|s| s.stage(feature_info.key))?;
 
     Ok(())
 }
@@ -121,10 +130,101 @@ fn process_stage_feature_for_activation(
 /// [SignalSupportForStagedFeatures](enum.FeatureGateInstruction.html)
 /// instruction.
 fn process_signal_support_for_staged_features(
-    _program_id: &Pubkey,
-    _accounts: &[AccountInfo],
-    _signal: FeatureBitMask,
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    signal: FeatureBitMask,
 ) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+
+    let staged_features_info = next_account_info(account_info_iter)?;
+    let validator_support_signal_info = next_account_info(account_info_iter)?;
+    let vote_account_info = next_account_info(account_info_iter)?;
+    let authorized_voter_info = next_account_info(account_info_iter)?;
+
+    // Ensure the authorized voter account is a signer.
+    if !authorized_voter_info.is_signer {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    // Load the clock sysvar to get the _current_ epoch.
+    let clock = <Clock as Sysvar>::get()?;
+    let current_epoch = clock.epoch;
+
+    // Ensure the provided authorized voter is the correct authorized voter for
+    // the provided vote account.
+    // Also validates vote account state.
+    {
+        let vote_data = vote_account_info.try_borrow_data()?;
+        let vote_state_versioned = bincode::deserialize::<VoteStateVersions>(&vote_data)
+            .map_err(|_| ProgramError::InvalidAccountData)?;
+
+        if vote_state_versioned.is_uninitialized() {
+            return Err(ProgramError::UninitializedAccount);
+        }
+
+        match vote_state_versioned
+            .convert_to_current()
+            .get_authorized_voter(clock.epoch)
+        {
+            Some(authorized) if authorized.eq(authorized_voter_info.key) => (),
+            _ => {
+                return Err(ProgramError::IncorrectAuthority);
+            }
+        }
+    }
+
+    // Ensure the staged features address is the correct address derived
+    // from the _current_ epoch.
+    if !staged_features_info
+        .key
+        .eq(&get_staged_features_address(&current_epoch))
+    {
+        return Err(FeatureGateError::IncorrectStagedFeaturesAddress.into());
+    }
+
+    // Ensure the staged features account is owned by the program.
+    if staged_features_info.owner != program_id {
+        return Err(ProgramError::IncorrectProgramId);
+    }
+
+    let mut staged_features_data = staged_features_info.try_borrow_mut_data()?;
+    let staged_features = unpack_pod_mut::<StagedFeatures>(&mut staged_features_data)?;
+
+    // Get the provided vote account's epoch stake.
+    let vote_account_epoch_stake = get_epoch_stake_for_vote_account(vote_account_info.key);
+
+    if vote_account_epoch_stake != 0 {
+        // Ensure the validator support signal address is the correct address
+        // derived from the vote account and the _current_ epoch.
+        if !validator_support_signal_info
+            .key
+            .eq(&get_validator_support_signal_address(vote_account_info.key))
+        {
+            return Err(FeatureGateError::IncorrectValidatorSupportSignalAddress.into());
+        }
+
+        // Load the validator's last signal.
+        let mut validator_support_signal_data =
+            validator_support_signal_info.try_borrow_mut_data()?;
+        let validator_support_signal_state =
+            unpack_pod_mut::<ValidatorSupportSignal>(&mut validator_support_signal_data)?;
+
+        // First deduct from the staged features the stake the validator
+        // previously signaled support for.
+        if let Some(last_signal) =
+            validator_support_signal_state.get_signal_for_epoch(current_epoch)
+        {
+            staged_features.deduct_stake_support(last_signal, vote_account_epoch_stake);
+        }
+
+        // Add the validator's stake in support of the _new_ signaled
+        // features.
+        staged_features.add_stake_support(&signal, vote_account_epoch_stake);
+
+        // Overwrite the validator's last signal.
+        validator_support_signal_state.store_signal(current_epoch, signal);
+    }
+
     Ok(())
 }
 
