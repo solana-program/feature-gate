@@ -3,9 +3,11 @@
 
 use {
     mollusk_svm::Mollusk,
+    solana_feature_gate_program::state::StagedFeatures,
     solana_sdk::{
         account::{Account, AccountSharedData},
         feature::Feature,
+        pubkey::Pubkey,
         rent::Rent,
     },
 };
@@ -40,6 +42,19 @@ pub fn active_feature_account() -> AccountSharedData {
             1, // `Some`
             45, 0, 0, 0, 0, 0, 0, 0, // Random slot `u64`
         ],
+        owner: solana_feature_gate_program::id(),
+        ..Account::default()
+    })
+}
+
+pub fn staged_features_account(feature_ids: &[Pubkey]) -> AccountSharedData {
+    let mut stage = StagedFeatures::default();
+    for (i, id) in feature_ids.iter().enumerate() {
+        stage.features[i].feature_id = *id;
+    }
+    AccountSharedData::from(Account {
+        lamports: 100_000_000,
+        data: bytemuck::bytes_of(&stage).to_vec(),
         owner: solana_feature_gate_program::id(),
         ..Account::default()
     })
