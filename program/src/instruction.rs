@@ -51,7 +51,43 @@ pub enum FeatureGateInstruction {
         description = "The system program"
     )]
     RevokePendingActivation,
+    /// Add a feature to the set of features staged for activation at the end of
+    /// the next epoch.
+    ///
+    /// Features submitted to this instruction during epoch N-1 will be staged
+    /// for activation at the end of epoch N. This instruction can only be
+    /// invoked by the designated staging authority.
+    ///
+    /// This instruction expects the staged features account to either exist or
+    /// have been allocated enough space and owned by the Feature Gate program,
+    /// in order to initialize state. If the account is not yet initialized, it
+    /// will be initialized before the new feature is added.
+    ///
+    /// Accounts expected by this instruction:
+    ///
+    ///   0. `[ ]`  Feature account
+    ///   1. `[w]`  Staged features account
+    ///   2. `[s]`  Staging authority
+    #[account(
+        0,
+        name = "feature",
+        description = "The feature account to stage"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "staged_features",
+        description = "The staged features account"
+    )]
+    #[account(
+        2,
+        signer,
+        name = "staging_authority",
+        description = "The staging authority"
+    )]
+    StageFeatureForActivation,
 }
+
 impl FeatureGateInstruction {
     /// Unpacks a byte buffer into a
     /// [FeatureGateInstruction](enum.FeatureGateInstruction.html).
@@ -69,7 +105,8 @@ impl FeatureGateInstruction {
     }
 }
 
-/// Creates a 'RevokePendingActivation' instruction.
+/// Creates a [RevokePendingActivation](enum.FeatureGateInstruction.html)
+/// instruction.
 pub fn revoke_pending_activation(feature_id: &Pubkey) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*feature_id, true),
@@ -78,6 +115,28 @@ pub fn revoke_pending_activation(feature_id: &Pubkey) -> Instruction {
     ];
 
     let data = FeatureGateInstruction::RevokePendingActivation.pack();
+
+    Instruction {
+        program_id: crate::id(),
+        accounts,
+        data,
+    }
+}
+
+/// Creates a [StageFeatureForActivation](enum.FeatureGateInstruction.html)
+/// instruction.
+pub fn stage_feature_for_activation(
+    feature_id: &Pubkey,
+    staged_features_address: &Pubkey,
+    staging_authority: &Pubkey,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*feature_id, false),
+        AccountMeta::new(*staged_features_address, false),
+        AccountMeta::new_readonly(*staging_authority, true),
+    ];
+
+    let data = FeatureGateInstruction::StageFeatureForActivation.pack();
 
     Instruction {
         program_id: crate::id(),
@@ -99,5 +158,10 @@ mod test {
     #[test]
     fn test_pack_unpack_revoke_pending_activation() {
         test_pack_unpack(&FeatureGateInstruction::RevokePendingActivation);
+    }
+
+    #[test]
+    fn test_pack_unpack_stage_feature_for_activation() {
+        test_pack_unpack(&FeatureGateInstruction::StageFeatureForActivation);
     }
 }
