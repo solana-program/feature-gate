@@ -16,7 +16,7 @@ use {
 
 /// Processes a [RevokePendingActivation](enum.FeatureGateInstruction.html)
 /// instruction.
-pub fn process_revoke_pending_activation(
+fn process_revoke_pending_activation(
     _program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
@@ -52,6 +52,15 @@ pub fn process_revoke_pending_activation(
     Ok(())
 }
 
+/// Processes a [StageFeatureForActivation](enum.FeatureGateInstruction.html)
+/// instruction.
+fn process_stage_feature_for_activation(
+    _program_id: &Pubkey,
+    _accounts: &[AccountInfo],
+) -> ProgramResult {
+    Ok(())
+}
+
 /// Processes an [Instruction](enum.Instruction.html).
 pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
     let instruction = FeatureGateInstruction::unpack(input)?;
@@ -59,6 +68,10 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> P
         FeatureGateInstruction::RevokePendingActivation => {
             msg!("Instruction: RevokePendingActivation");
             process_revoke_pending_activation(program_id, accounts)
+        }
+        FeatureGateInstruction::StageFeatureForActivation => {
+            msg!("Instruction: StageFeatureForActivation");
+            process_stage_feature_for_activation(program_id, accounts)
         }
     }
 }
