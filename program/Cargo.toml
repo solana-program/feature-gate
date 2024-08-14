@@ -16,6 +16,7 @@ bpf-entrypoint = []
 test-sbf = []
 
 [dependencies]
+bytemuck = { version = "1.16.0", features = ["derive"] }
 num_enum = "0.7.2"
 shank = "0.4.2"
 solana-program = "2.0.1"
