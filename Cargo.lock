@@ -3842,6 +3842,7 @@ dependencies = [
 name = "solana-feature-gate-program"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "bytemuck",
  "shank",
  "solana-program",

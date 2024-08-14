@@ -11,6 +11,9 @@ pub enum FeatureGateError {
     /// Incorrect staged features address
     #[error("Incorrect staged features address")]
     IncorrectStagedFeaturesAddress,
+    /// Incorrect validator support signal address
+    #[error("Incorrect validator support signal address")]
+    IncorrectValidatorSupportSignalAddress,
     /// Feature already staged for activation
     #[error("Feature already staged for activation")]
     FeatureAlreadyStaged,
