@@ -3996,6 +3996,7 @@ dependencies = [
 name = "solana-feature-gate-program"
 version = "0.0.1"
 dependencies = [
+ "bytemuck",
  "mollusk-svm",
  "mollusk-svm-bencher",
  "num_enum",
