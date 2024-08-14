@@ -248,7 +248,7 @@ fn fail_feature_already_staged() {
 
     let feature_account = pending_feature_account();
     let stage_account = staged_features_account(
-        &[feature], // Feature already staged.
+        &[(feature, 100_000_000)], // Feature already staged.
     );
 
     mollusk.process_and_validate_instruction(
@@ -275,7 +275,7 @@ fn fail_feature_stage_full() {
 
     let feature_account = pending_feature_account();
     let stage_account = staged_features_account(
-        &[Pubkey::new_unique(); MAX_FEATURES], // Stage full.
+        &[(Pubkey::new_unique(), 100_000_000); MAX_FEATURES], // Stage full.
     );
 
     mollusk.process_and_validate_instruction(
@@ -292,7 +292,7 @@ fn fail_feature_stage_full() {
 }
 
 enum Case {
-    Initialized { features: Vec<Pubkey> },
+    Initialized { features: Vec<(Pubkey, u64)> },
     NotInitialized,
 }
 
@@ -301,27 +301,27 @@ enum Case {
 }; "initialized with no keys")]
 #[test_case(
     Case::Initialized { features: vec![
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
+        (Pubkey::new_unique(), 100_000_000),
+        (Pubkey::new_unique(), 200_000_000),
     ]
 }; "initialized with 2 keys")]
 #[test_case(
     Case::Initialized { features: vec![
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
+        (Pubkey::new_unique(), 100_000_000),
+        (Pubkey::new_unique(), 200_000_000),
+        (Pubkey::new_unique(), 300_000_000),
+        (Pubkey::new_unique(), 400_000_000),
     ]
 }; "initialized with 4 keys")]
 #[test_case(
     Case::Initialized { features: vec![
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
-        Pubkey::new_unique(),
+        (Pubkey::new_unique(), 100_000_000),
+        (Pubkey::new_unique(), 200_000_000),
+        (Pubkey::new_unique(), 300_000_000),
+        (Pubkey::new_unique(), 400_000_000),
+        (Pubkey::new_unique(), 500_000_000),
+        (Pubkey::new_unique(), 600_000_000),
+        (Pubkey::new_unique(), 700_000_000),
     ]
 }; "initialized with 7 keys")]
 #[test_case(Case::NotInitialized; "not initialized")]
@@ -335,15 +335,17 @@ fn success(case: Case) {
 
     let feature_account = pending_feature_account();
 
-    let process_instruction = |stage_account: AccountSharedData, initial_features: &[Pubkey]| {
+    let process_instruction = |stage_account: AccountSharedData,
+                               initial_features: &[(Pubkey, u64)]| {
         // The stage should have our new feature.
         let mut expected_feature_stage = [FeatureStake::default(); MAX_FEATURES];
         initial_features
             .iter()
-            .chain(std::iter::once(&feature))
+            .chain(std::iter::once(&(feature, 0)))
             .enumerate()
-            .for_each(|(i, id)| {
+            .for_each(|(i, (id, stake_support))| {
                 expected_feature_stage[i].feature_id = *id;
+                expected_feature_stage[i].stake_support = *stake_support;
             });
 
         mollusk.process_and_validate_instruction(

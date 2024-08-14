@@ -22,7 +22,6 @@ use {
         pubkey::Pubkey,
         system_instruction, system_program,
         sysvar::Sysvar,
-        vote::state::VoteStateVersions,
     },
 };
 
@@ -154,22 +153,24 @@ fn process_signal_support_for_staged_features(
     // the provided vote account.
     // Also validates vote account state.
     {
-        let vote_data = vote_account_info.try_borrow_data()?;
-        let vote_state_versioned = bincode::deserialize::<VoteStateVersions>(&vote_data)
-            .map_err(|_| ProgramError::InvalidAccountData)?;
-
-        if vote_state_versioned.is_uninitialized() {
-            return Err(ProgramError::UninitializedAccount);
+        if !vote_account_info
+            .owner
+            .eq(&solana_program::vote::program::id())
+        {
+            return Err(ProgramError::InvalidAccountOwner);
         }
 
-        match vote_state_versioned
-            .convert_to_current()
-            .get_authorized_voter(clock.epoch)
-        {
-            Some(authorized) if authorized.eq(authorized_voter_info.key) => (),
-            _ => {
-                return Err(ProgramError::IncorrectAuthority);
-            }
+        // Authorized voter pubkey is at offset 36. Don't deserialize the whole
+        // vote account.
+        let vote_data = vote_account_info.try_borrow_data()?;
+        let vote_state_authorized_voter = vote_data
+            .get(36..68)
+            .and_then(|slice| slice.try_into().ok())
+            .map(Pubkey::new_from_array)
+            .ok_or(ProgramError::InvalidAccountData)?;
+
+        if !vote_state_authorized_voter.eq(authorized_voter_info.key) {
+            return Err(ProgramError::IncorrectAuthority);
         }
     }
 
