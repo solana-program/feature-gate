@@ -4,7 +4,7 @@ use {
     crate::{
         error::FeatureGateError,
         instruction::FeatureGateInstruction,
-        state::{get_staged_features_address, StagedFeatures},
+        state::{get_staged_features_address, FeatureBitMask, StagedFeatures},
     },
     solana_program::{
         account_info::{next_account_info, AccountInfo},
@@ -117,6 +117,17 @@ fn process_stage_feature_for_activation(
     Ok(())
 }
 
+/// Processes a
+/// [SignalSupportForStagedFeatures](enum.FeatureGateInstruction.html)
+/// instruction.
+fn process_signal_support_for_staged_features(
+    _program_id: &Pubkey,
+    _accounts: &[AccountInfo],
+    _signal: FeatureBitMask,
+) -> ProgramResult {
+    Ok(())
+}
+
 /// Processes an [Instruction](enum.Instruction.html).
 pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
     let instruction = FeatureGateInstruction::unpack(input)?;
@@ -128,6 +139,10 @@ pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> P
         FeatureGateInstruction::StageFeatureForActivation => {
             msg!("Instruction: StageFeatureForActivation");
             process_stage_feature_for_activation(program_id, accounts)
+        }
+        FeatureGateInstruction::SignalSupportForStagedFeatures { signal } => {
+            msg!("Instruction: SignalSupportForStagedFeatures");
+            process_signal_support_for_staged_features(program_id, accounts, signal)
         }
     }
 }

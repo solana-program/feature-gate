@@ -74,6 +74,29 @@ impl StagedFeatures {
     }
 }
 
+/// A bitmask used to identify support for a set of features.
+///
+/// Each bit in the mask corresponds to a feature ID in the
+/// staged features account. A bit set to 1 indicates support
+/// for the corresponding feature.
+///
+/// Example:
+///
+/// ```text
+/// Features = [A, B, C, D, E, F, G, H]
+/// Bitmask = 170 = 10101010
+/// Signalled support for features: A, C, E, G
+/// ```
+#[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
+#[repr(transparent)]
+pub struct FeatureBitMask(pub u8);
+
+impl From<&FeatureBitMask> for u8 {
+    fn from(mask: &FeatureBitMask) -> u8 {
+        mask.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
