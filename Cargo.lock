@@ -3843,7 +3843,6 @@ name = "solana-feature-gate-program"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "num_enum",
  "shank",
  "solana-program",
  "solana-program-test",

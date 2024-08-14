@@ -1,7 +1,7 @@
 //! Program instructions
 
 use {
-    num_enum::{IntoPrimitive, TryFromPrimitive},
+    crate::state::FeatureBitMask,
     shank::ShankInstruction,
     solana_program::{
         incinerator,
@@ -14,7 +14,7 @@ use {
 
 /// Feature Gate program instructions
 #[rustfmt::skip]
-#[derive(Clone, Debug, PartialEq, IntoPrimitive, ShankInstruction, TryFromPrimitive)]
+#[derive(Clone, Debug, PartialEq, ShankInstruction)]
 #[repr(u8)]
 pub enum FeatureGateInstruction {
     /// Revoke a pending feature activation.
@@ -93,22 +93,86 @@ pub enum FeatureGateInstruction {
         description = "The system program"
     )]
     StageFeatureForActivation,
+    /// Signal stake support for staged features.
+    ///
+    /// This instruction will lookup the provided vote account's total stake
+    /// for the current epoch, then interpret the provided bitmask, then use
+    /// their stake amount to update the stake in support for the features in
+    /// the staged features account.
+    /// 
+    /// This instruction expects the validator support signal account to either
+    /// exist or contain enough lamports to be rent-exempt after
+    /// initialization. If the account is not yet initialized, it will be
+    /// initialized, and the validator's stake will be added to each supported
+    /// feature. If it exists and contains the validator's last submitted
+    /// bitmask, the validator's previous bitmask will be used to deduct stake
+    /// support before adding the new stake support, to account for changes in
+    /// the validator's support signal.
+    ///
+    /// Accounts expected by this instruction:
+    ///
+    ///   0. `[w]`      Staged features account
+    ///   1. `[w]`      Validator support signal account
+    ///   2. `[ ]`      Vote account
+    ///   3. `[s]`      Authorized voter account
+    ///   4. `[ ]`      System program
+    #[account(
+        0,
+        writable,
+        name = "staged_features",
+        description = "The staged features account"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "validator_support_signal",
+        description = "The validator support signal account"
+    )]
+    #[account(
+        2,
+        name = "vote_account",
+        description = "The vote account"
+    )]
+    #[account(
+        3,
+        signer,
+        name = "authorized_voter",
+        description = "authorized voter account"
+    )]
+    #[account(
+        4,
+        name = "system_program",
+        description = "The system program"
+    )]
+    SignalSupportForStagedFeatures {
+        /// The bitmask of features supported.
+        signal: FeatureBitMask,
+    },
 }
 
 impl FeatureGateInstruction {
     /// Unpacks a byte buffer into a
     /// [FeatureGateInstruction](enum.FeatureGateInstruction.html).
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
-        if input.len() != 1 {
-            return Err(ProgramError::InvalidInstructionData);
+        match input.split_first() {
+            Some((&0, _)) => Ok(Self::RevokePendingActivation),
+            Some((&1, _)) => Ok(Self::StageFeatureForActivation),
+            Some((&2, rest)) if rest.len() == 1 => {
+                let signal = FeatureBitMask(rest[0]);
+                Ok(Self::SignalSupportForStagedFeatures { signal })
+            }
+            _ => Err(ProgramError::InvalidInstructionData),
         }
-        Self::try_from(input[0]).map_err(|_| ProgramError::InvalidInstructionData)
     }
 
     /// Packs a [FeatureGateInstruction](enum.FeatureGateInstruction.html) into
     /// a byte buffer.
     pub fn pack(&self) -> Vec<u8> {
-        vec![self.to_owned().into()]
+        match self {
+            Self::RevokePendingActivation => vec![0],
+            Self::StageFeatureForActivation => vec![1],
+            Self::SignalSupportForStagedFeatures { signal } => vec![2, signal.into()],
+        }
     }
 }
 
@@ -157,6 +221,36 @@ pub fn stage_feature_for_activation(
     }
 }
 
+/// Creates a [SignalSupportForStagedFeatures](enum.FeatureGateInstruction.html)
+/// instruction.
+pub fn signal_support_for_staged_features(
+    staged_features_address: &Pubkey,
+    validator_support_signal_address: &Pubkey,
+    vote_account_address: &Pubkey,
+    authorized_voter_address: &Pubkey,
+    signal: FeatureBitMask,
+    init: bool,
+) -> Instruction {
+    let mut accounts = vec![
+        AccountMeta::new(*staged_features_address, false),
+        AccountMeta::new(*validator_support_signal_address, false),
+        AccountMeta::new_readonly(*vote_account_address, false),
+        AccountMeta::new_readonly(*authorized_voter_address, true),
+    ];
+
+    if init {
+        accounts.push(AccountMeta::new_readonly(system_program::id(), false));
+    }
+
+    let data = FeatureGateInstruction::SignalSupportForStagedFeatures { signal }.pack();
+
+    Instruction {
+        program_id: crate::id(),
+        accounts,
+        data,
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -175,5 +269,18 @@ mod test {
     #[test]
     fn test_pack_unpack_stage_feature_for_activation() {
         test_pack_unpack(&FeatureGateInstruction::StageFeatureForActivation);
+    }
+
+    #[test]
+    fn test_pack_unpack_signal_support_for_staged_features() {
+        test_pack_unpack(&FeatureGateInstruction::SignalSupportForStagedFeatures {
+            signal: FeatureBitMask(0),
+        });
+        test_pack_unpack(&FeatureGateInstruction::SignalSupportForStagedFeatures {
+            signal: FeatureBitMask(1),
+        });
+        test_pack_unpack(&FeatureGateInstruction::SignalSupportForStagedFeatures {
+            signal: FeatureBitMask(255),
+        });
     }
 }
