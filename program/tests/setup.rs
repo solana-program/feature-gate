@@ -2,47 +2,45 @@
 #![allow(dead_code)]
 
 use {
-    solana_program_test::*,
+    mollusk_svm::Mollusk,
     solana_sdk::{
         account::{Account, AccountSharedData},
-        pubkey::Pubkey,
+        feature::Feature,
+        rent::Rent,
     },
 };
 
-pub fn setup() -> ProgramTest {
-    ProgramTest::new(
+pub fn setup() -> Mollusk {
+    Mollusk::new(
+        &solana_feature_gate_program::id(),
         "solana_feature_gate_program",
-        solana_feature_gate_program::id(),
-        processor!(solana_feature_gate_program::processor::process),
     )
 }
 
-pub fn setup_pending_feature(context: &mut ProgramTestContext, feature_id: &Pubkey) {
-    context.set_account(
-        feature_id,
-        &AccountSharedData::from(Account {
-            lamports: 100_000_000,
-            data: vec![
-                0, // `None`
-                0, 0, 0, 0, 0, 0, 0, 0,
-            ],
-            owner: solana_feature_gate_program::id(),
-            ..Account::default()
-        }),
-    );
+fn feature_rent() -> u64 {
+    Rent::default().minimum_balance(Feature::size_of())
 }
 
-pub fn setup_active_feature(context: &mut ProgramTestContext, feature_id: &Pubkey) {
-    context.set_account(
-        feature_id,
-        &AccountSharedData::from(Account {
-            lamports: 100_000_000,
-            data: vec![
-                1, // `Some`
-                45, 0, 0, 0, 0, 0, 0, 0, // Random slot `u64`
-            ],
-            owner: solana_feature_gate_program::id(),
-            ..Account::default()
-        }),
-    );
+pub fn pending_feature_account() -> AccountSharedData {
+    AccountSharedData::from(Account {
+        lamports: feature_rent(),
+        data: vec![
+            0, // `None`
+            0, 0, 0, 0, 0, 0, 0, 0,
+        ],
+        owner: solana_feature_gate_program::id(),
+        ..Account::default()
+    })
+}
+
+pub fn active_feature_account() -> AccountSharedData {
+    AccountSharedData::from(Account {
+        lamports: feature_rent(),
+        data: vec![
+            1, // `Some`
+            45, 0, 0, 0, 0, 0, 0, 0, // Random slot `u64`
+        ],
+        owner: solana_feature_gate_program::id(),
+        ..Account::default()
+    })
 }
