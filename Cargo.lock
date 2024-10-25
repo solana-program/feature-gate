@@ -2176,6 +2176,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "mollusk-svm-bencher"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19edc6403e493718d693b5faa0b6bcc2aebdd4947dc16c144929dc3d7c5c0f24"
+dependencies = [
+ "chrono",
+ "mollusk-svm",
+ "num-format",
+ "serde_json",
+ "solana-sdk",
+]
+
+[[package]]
 name = "mollusk-svm-fuzz-fixture"
 version = "0.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2297,6 +2310,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.72",
+]
+
+[[package]]
+name = "num-format"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a652d9771a63711fd3c3deb670acfbe5c30a4072e664d7a3bf5a9e1056ac72c3"
+dependencies = [
+ "arrayvec",
+ "itoa",
 ]
 
 [[package]]
@@ -3940,6 +3963,7 @@ name = "solana-feature-gate-program"
 version = "0.1.0"
 dependencies = [
  "mollusk-svm",
+ "mollusk-svm-bencher",
  "num_enum",
  "shank",
  "solana-program",
