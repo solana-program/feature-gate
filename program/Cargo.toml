@@ -1,6 +1,6 @@
 [package]
 name = "solana-feature-gate-program"
-version = "0.1.0"
+version = "0.0.1"
 description = "Solana Feature Gate Program"
 authors = ["Anza Technology Maintainers <maintainers@anza.xyz>"]
 repository = "https://github.com/solana-program/feature-gate"
