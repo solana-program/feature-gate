@@ -3,3 +3,7 @@
 //! to add features, then rerun kinobi to update it.
 //!
 //! <https://github.com/kinobi-so/kinobi>
+
+pub(crate) mod solana_feature_gate;
+
+pub use self::solana_feature_gate::SolanaFeatureGateError;

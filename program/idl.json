@@ -37,6 +37,13 @@
       }
     }
   ],
+  "errors": [
+    {
+      "code": 0,
+      "name": "FeatureAlreadyActivated",
+      "msg": "Feature already activated"
+    }
+  ],
   "metadata": {
     "origin": "shank",
     "address": "Feature111111111111111111111111111111111111",
