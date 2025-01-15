@@ -26,11 +26,11 @@
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
-    "@kinobi-so/nodes-from-anchor": "^0.20.9",
-    "@kinobi-so/renderers-js": "^0.21.2",
-    "@kinobi-so/renderers-rust": "^0.21.0",
+    "@codama/nodes-from-anchor": "^1.1.0",
+    "@codama/renderers-js": "^1.1.1",
+    "@codama/renderers-rust": "^1.0.6",
     "@metaplex-foundation/shank-js": "^0.1.7",
-    "kinobi": "^0.21.0",
+    "codama": "^1.2.0",
     "typescript": "^5.5.2",
     "zx": "^7.2.3"
   },
