@@ -2442,7 +2442,7 @@ dependencies = [
 
 [[package]]
 name = "solana-feature-gate-client"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "borsh 0.10.3",
  "num-derive",

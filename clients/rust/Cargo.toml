@@ -1,6 +1,6 @@
 [package]
 name = "solana-feature-gate-client"
-version = "0.0.1"
+version = "0.0.2"
 description = "A generated Rust library for the Feature Gate program"
 repository = "https://github.com/solana-program/feature-gate"
 edition = "2021"
