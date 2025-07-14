@@ -2,16 +2,14 @@
 
 use {
     crate::{error::FeatureGateError, instruction::FeatureGateInstruction},
-    solana_program::{
-        account_info::{next_account_info, AccountInfo},
-        entrypoint::ProgramResult,
-        feature::Feature,
-        incinerator, msg,
-        program::invoke,
-        program_error::ProgramError,
-        pubkey::Pubkey,
-        system_instruction, system_program,
-    },
+    solana_account_info::{next_account_info, AccountInfo},
+    solana_cpi::invoke,
+    solana_feature_gate_interface::Feature,
+    solana_msg::msg,
+    solana_program_error::{ProgramError, ProgramResult},
+    solana_pubkey::Pubkey,
+    solana_sdk_ids::incinerator,
+    solana_system_interface::{instruction as system_instruction, program as system_program},
 };
 
 /// Processes a [RevokePendingActivation](enum.FeatureGateInstruction.html)
@@ -39,7 +37,7 @@ pub fn process_revoke_pending_activation(
     }
 
     // Clear data and reassign.
-    feature_info.realloc(0, true)?;
+    feature_info.resize(0)?;
     feature_info.assign(&system_program::id());
 
     // Burn the lamports.

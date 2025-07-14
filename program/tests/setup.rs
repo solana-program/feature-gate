@@ -3,11 +3,7 @@
 
 use {
     mollusk_svm::Mollusk,
-    solana_sdk::{
-        account::{Account, AccountSharedData},
-        feature::Feature,
-        rent::Rent,
-    },
+    solana_sdk::{account::Account, feature::Feature, rent::Rent},
 };
 
 pub fn setup() -> Mollusk {
@@ -21,8 +17,8 @@ fn feature_rent() -> u64 {
     Rent::default().minimum_balance(Feature::size_of())
 }
 
-pub fn pending_feature_account() -> AccountSharedData {
-    AccountSharedData::from(Account {
+pub fn pending_feature_account() -> Account {
+    Account {
         lamports: feature_rent(),
         data: vec![
             0, // `None`
@@ -30,11 +26,11 @@ pub fn pending_feature_account() -> AccountSharedData {
         ],
         owner: solana_feature_gate_program::id(),
         ..Account::default()
-    })
+    }
 }
 
-pub fn active_feature_account() -> AccountSharedData {
-    AccountSharedData::from(Account {
+pub fn active_feature_account() -> Account {
+    Account {
         lamports: feature_rent(),
         data: vec![
             1, // `Some`
@@ -42,5 +38,5 @@ pub fn active_feature_account() -> AccountSharedData {
         ],
         owner: solana_feature_gate_program::id(),
         ..Account::default()
-    })
+    }
 }

@@ -3,10 +3,10 @@ resolver = "2"
 members = ["clients/rust", "program"]
 
 [workspace.metadata.cli]
-solana = "2.0.2"
+solana = "2.3.4"
 
 # Specify Rust toolchains for rustfmt, clippy, and build.
 # Any unprovided toolchains default to stable.
 [workspace.metadata.toolchains]
-format = "nightly-2024-05-02"
-lint = "nightly-2024-05-02"
+format = "nightly-2025-02-16"
+lint = "nightly-2025-02-16"
