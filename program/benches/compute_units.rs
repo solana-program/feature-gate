@@ -3,8 +3,8 @@
 use {
     mollusk_svm::{program::keyed_account_for_system_program, Mollusk},
     mollusk_svm_bencher::{Bench, MolluskComputeUnitBencher},
-    solana_feature_gate_program::instruction::revoke_pending_activation,
     solana_feature_gate_interface::Feature,
+    solana_feature_gate_program::instruction::revoke_pending_activation,
     solana_sdk::{account::Account, incinerator, pubkey::Pubkey},
 };
 
