@@ -4,7 +4,8 @@ use {
     mollusk_svm::{program::keyed_account_for_system_program, Mollusk},
     mollusk_svm_bencher::{Bench, MolluskComputeUnitBencher},
     solana_feature_gate_program::instruction::revoke_pending_activation,
-    solana_sdk::{account::Account, feature::Feature, incinerator, pubkey::Pubkey},
+    solana_feature_gate_interface::Feature,
+    solana_sdk::{account::Account, incinerator, pubkey::Pubkey},
 };
 
 fn main() {
@@ -19,9 +20,10 @@ fn main() {
         &[
             (
                 feature,
-                Account::new_data(
+                Account::new_data_with_space(
                     42,
                     &Feature { activated_at: None },
+                    9,
                     &solana_sdk::feature::id(),
                 )
                 .unwrap(),
