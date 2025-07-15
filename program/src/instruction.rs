@@ -3,13 +3,11 @@
 use {
     num_enum::{IntoPrimitive, TryFromPrimitive},
     shank::ShankInstruction,
-    solana_program::{
-        incinerator,
-        instruction::{AccountMeta, Instruction},
-        program_error::ProgramError,
-        pubkey::Pubkey,
-        system_program,
-    },
+    solana_instruction::{AccountMeta, Instruction},
+    solana_program_error::ProgramError,
+    solana_pubkey::Pubkey,
+    solana_sdk_ids::incinerator,
+    solana_system_interface::program as system_program,
 };
 
 /// Feature Gate program instructions

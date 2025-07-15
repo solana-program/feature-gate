@@ -9,7 +9,7 @@ use {
         error::FeatureGateError, instruction::revoke_pending_activation,
     },
     solana_sdk::{
-        account::{AccountSharedData, WritableAccount},
+        account::{Account, WritableAccount},
         incinerator,
         program_error::ProgramError,
         pubkey::Pubkey,
@@ -28,7 +28,7 @@ fn fail_feature_not_signer() {
         &instruction,
         &[
             (feature, pending_feature_account()),
-            (incinerator::id(), AccountSharedData::default()),
+            (incinerator::id(), Account::default()),
             keyed_account_for_system_program(),
         ],
         &[Check::err(ProgramError::MissingRequiredSignature)],
@@ -48,7 +48,7 @@ fn fail_feature_incorrect_owner() {
         &revoke_pending_activation(&feature),
         &[
             (feature, feature_account),
-            (incinerator::id(), AccountSharedData::default()),
+            (incinerator::id(), Account::default()),
             keyed_account_for_system_program(),
         ],
         &[Check::err(ProgramError::InvalidAccountOwner)],
@@ -62,13 +62,13 @@ fn fail_feature_invalid_data() {
 
     // Set up a feature account with invalid data.
     let mut feature_account = pending_feature_account();
-    feature_account.set_data_from_slice(&[2; 8]);
+    feature_account.data = vec![2; 8];
 
     mollusk.process_and_validate_instruction(
         &revoke_pending_activation(&feature),
         &[
             (feature, feature_account),
-            (incinerator::id(), AccountSharedData::default()),
+            (incinerator::id(), Account::default()),
             keyed_account_for_system_program(),
         ],
         &[Check::err(ProgramError::InvalidAccountData)],
@@ -84,7 +84,7 @@ fn fail_feature_already_activated() {
         &revoke_pending_activation(&feature),
         &[
             (feature, active_feature_account()),
-            (incinerator::id(), AccountSharedData::default()),
+            (incinerator::id(), Account::default()),
             keyed_account_for_system_program(),
         ],
         &[Check::err(ProgramError::Custom(
@@ -102,12 +102,12 @@ fn success() {
         &revoke_pending_activation(&feature),
         &[
             (feature, pending_feature_account()),
-            (incinerator::id(), AccountSharedData::default()),
+            (incinerator::id(), Account::default()),
             keyed_account_for_system_program(),
         ],
         &[
             Check::success(),
-            Check::compute_units(2_781),
+            Check::compute_units(2_724),
             // Confirm feature account was closed.
             Check::account(&feature).closed().build(),
         ],
