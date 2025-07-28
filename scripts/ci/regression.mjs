@@ -1,6 +1,6 @@
 #!/usr/bin/env zx
 
-// Mollusk conformance testing of this Core BPF Feature Gate program against
+// Mollusk regression testing of this Core BPF Feature Gate program against
 // the version running on mainnet-beta.
 
 import 'zx/globals';
@@ -11,9 +11,10 @@ const programBinaryPath = getProgramSharedObjectPath('program');
 const baseBinaryPath = path.join(workingDirectory, 'program', 'fuzz', 'program-mb-3-17-2025.so');
 const molluskFixturesPath = path.join(workingDirectory, 'program', 'fuzz', 'blob');
 
-// Test this program against the cloned program for conformance with Mollusk.
+// Test this program against the cloned program for regression with Mollusk.
 let output = await $`mollusk run-test \
-    --proto firedancer --ignore-compute-units \
+    --proto mollusk \
+    --ignore-compute-units \
     ${baseBinaryPath} ${programBinaryPath} \
     ${molluskFixturesPath} ${programId}`;
 
