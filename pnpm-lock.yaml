@@ -15,7 +15,7 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)
       '@codama/renderers-rust':
-        specifier: '=1.0.22'
+        specifier: ^1.0.22
         version: 1.0.22(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)
       '@iarna/toml':
         specifier: ^2.2.5
