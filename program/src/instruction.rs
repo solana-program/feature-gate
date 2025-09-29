@@ -60,8 +60,8 @@ impl FeatureGateInstruction {
         Self::try_from(input[0]).map_err(|_| ProgramError::InvalidInstructionData)
     }
 
-    /// Packs a [`FeatureGateInstruction`](enum.FeatureGateInstruction.html) into
-    /// a byte buffer.
+    /// Packs a [`FeatureGateInstruction`](enum.FeatureGateInstruction.html)
+    /// into a byte buffer.
     pub fn pack(&self) -> Vec<u8> {
         vec![self.to_owned().into()]
     }
