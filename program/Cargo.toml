@@ -17,7 +17,7 @@ num-derive = "0.4"
 num-traits = "0.2"
 shank = "0.4.2"
 solana-account-info = "3.0.0"
-solana-cpi = "2.2.1"
+solana-cpi = "3.0.0"
 solana-feature-gate-interface = { version = "3.0.0", features = ["bincode"] }
 solana-instruction = "2.2.1"
 solana-msg = "2.2.1"
