@@ -3,15 +3,13 @@ mod setup;
 use {
     mollusk_svm::{program::keyed_account_for_system_program, result::Check},
     setup::{active_feature_account, pending_feature_account, setup},
+    solana_account::{Account, WritableAccount},
     solana_feature_gate_program::{
         error::FeatureGateError, instruction::revoke_pending_activation,
     },
-    solana_sdk::{
-        account::{Account, WritableAccount},
-        incinerator,
-        program_error::ProgramError,
-        pubkey::Pubkey,
-    },
+    solana_program_error::ProgramError,
+    solana_pubkey::Pubkey,
+    solana_sdk_ids::incinerator,
 };
 
 #[test]
@@ -105,7 +103,7 @@ fn success() {
         ],
         &[
             Check::success(),
-            Check::compute_units(2_724),
+            Check::compute_units(2_777),
             // Confirm feature account was closed.
             Check::account(&feature).closed().build(),
         ],

@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
 use {
-    mollusk_svm::Mollusk,
-    solana_sdk::{account::Account, feature::Feature, rent::Rent},
+    mollusk_svm::Mollusk, solana_account::Account, solana_feature_gate_interface::state::Feature,
+    solana_rent::Rent,
 };
 
 pub fn setup() -> Mollusk {
