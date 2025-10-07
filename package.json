@@ -6,7 +6,7 @@
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
-    "@codama/nodes-from-anchor": "^1.1.0",
+    "@codama/nodes-from-anchor": "^1.2.9",
     "@codama/renderers-js": "^1.1.1",
     "@codama/renderers-rust": "^1.0.22",
     "@metaplex-foundation/shank-js": "^0.1.7",
