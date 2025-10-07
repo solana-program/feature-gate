@@ -51,7 +51,7 @@
     "tsup": "^8.1.2",
     "typedoc": "^0.25.12",
     "typedoc-plugin-missing-exports": "^2.2.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.9.3"
   },
   "ava": {
     "nodeArguments": [
