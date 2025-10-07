@@ -1,4 +1,3 @@
-#![cfg(feature = "test-sbf")]
 #![allow(dead_code)]
 
 use {

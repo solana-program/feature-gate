@@ -52,7 +52,7 @@ pub enum FeatureGateInstruction {
 }
 impl FeatureGateInstruction {
     /// Unpacks a byte buffer into a
-    /// [FeatureGateInstruction](enum.FeatureGateInstruction.html).
+    /// [`FeatureGateInstruction`](enum.FeatureGateInstruction.html).
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
         if input.len() != 1 {
             return Err(ProgramError::InvalidInstructionData);
@@ -60,14 +60,14 @@ impl FeatureGateInstruction {
         Self::try_from(input[0]).map_err(|_| ProgramError::InvalidInstructionData)
     }
 
-    /// Packs a [FeatureGateInstruction](enum.FeatureGateInstruction.html) into
-    /// a byte buffer.
+    /// Packs a [`FeatureGateInstruction`](enum.FeatureGateInstruction.html)
+    /// into a byte buffer.
     pub fn pack(&self) -> Vec<u8> {
         vec![self.to_owned().into()]
     }
 }
 
-/// Creates a 'RevokePendingActivation' instruction.
+/// Creates a `RevokePendingActivation` instruction.
 pub fn revoke_pending_activation(feature_id: &Pubkey) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*feature_id, true),

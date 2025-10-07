@@ -7,6 +7,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
+#[derive(Debug)]
 pub struct RevokePendingActivation {
     /// The feature account to revoke
     pub feature: solana_program::pubkey::Pubkey,
@@ -20,6 +21,7 @@ impl RevokePendingActivation {
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(&[])
     }
+    #[allow(clippy::arithmetic_side_effects)]
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
@@ -39,9 +41,7 @@ impl RevokePendingActivation {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let data = RevokePendingActivationInstructionData::new()
-            .try_to_vec()
-            .unwrap();
+        let data = borsh::to_vec(&RevokePendingActivationInstructionData::new()).unwrap();
 
         solana_program::instruction::Instruction {
             program_id: crate::SOLANA_FEATURE_GATE_ID,
@@ -196,6 +196,7 @@ impl<'a, 'b> RevokePendingActivationCpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         self.invoke_signed_with_remaining_accounts(signers_seeds, &[])
     }
+    #[allow(clippy::arithmetic_side_effects)]
     #[allow(clippy::clone_on_copy)]
     #[allow(clippy::vec_init_then_push)]
     pub fn invoke_signed_with_remaining_accounts(
@@ -227,9 +228,7 @@ impl<'a, 'b> RevokePendingActivationCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let data = RevokePendingActivationInstructionData::new()
-            .try_to_vec()
-            .unwrap();
+        let data = borsh::to_vec(&RevokePendingActivationInstructionData::new()).unwrap();
 
         let instruction = solana_program::instruction::Instruction {
             program_id: crate::SOLANA_FEATURE_GATE_ID,

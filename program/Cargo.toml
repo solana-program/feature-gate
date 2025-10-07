@@ -11,10 +11,6 @@ edition = "2021"
 [package.metadata.solana]
 program-id = "Feature111111111111111111111111111111111111"
 
-[features]
-bpf-entrypoint = []
-test-sbf = []
-
 [dependencies]
 num_enum = "0.7.2"
 num-derive = "0.4"
@@ -22,7 +18,7 @@ num-traits = "0.2"
 shank = "0.4.2"
 solana-account-info = "2.2.1"
 solana-cpi = "2.2.1"
-solana-feature-gate-interface = { version = "2.2.1", features = ["bincode"] }
+solana-feature-gate-interface = { version = "2.2.2", features = ["bincode"] }
 solana-instruction = "2.2.1"
 solana-msg = "2.2.1"
 solana-program-entrypoint = "2.2.1"
@@ -44,8 +40,5 @@ crate-type = ["cdylib", "lib"]
 name = "compute_units"
 harness = false
 
-[lints.rust.unexpected_cfgs]
-level = "warn"
-check-cfg = [
-    'cfg(target_os, values("solana"))',
-]
+[lints]
+workspace = true

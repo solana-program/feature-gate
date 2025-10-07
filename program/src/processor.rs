@@ -12,7 +12,7 @@ use {
     solana_system_interface::{instruction as system_instruction, program as system_program},
 };
 
-/// Processes a [RevokePendingActivation](enum.FeatureGateInstruction.html)
+/// Processes a [`RevokePendingActivation`](enum.FeatureGateInstruction.html)
 /// instruction.
 pub fn process_revoke_pending_activation(
     _program_id: &Pubkey,
