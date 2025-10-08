@@ -21,7 +21,7 @@ solana-cpi = "3.0.0"
 solana-feature-gate-interface = { version = "3.0.0", features = ["bincode"] }
 solana-instruction = "2.2.1"
 solana-msg = "2.2.1"
-solana-program-entrypoint = "2.2.1"
+solana-program-entrypoint = "3.1.0"
 solana-program-error = "3.0.0"
 solana-pubkey = "2.2.1"
 solana-sdk-ids = "3.0.0"
