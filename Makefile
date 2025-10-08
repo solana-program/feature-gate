@@ -1,5 +1,5 @@
 RUST_TOOLCHAIN_NIGHTLY = nightly-2025-02-16
-SOLANA_CLI_VERSION = 2.3.4
+SOLANA_CLI_VERSION = 3.0.0
 
 nightly = +${RUST_TOOLCHAIN_NIGHTLY}
 
@@ -33,6 +33,7 @@ spellcheck:
 clippy-%:
 	cargo $(nightly) clippy --manifest-path $(call make-path,$*)/Cargo.toml \
 	  --all-targets \
+	  --all-features \
 		-- \
 		--deny=warnings \
 		--deny=clippy::default_trait_access \

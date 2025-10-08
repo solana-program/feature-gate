@@ -13,14 +13,8 @@ pub enum SolanaFeatureGateError {
     FeatureAlreadyActivated = 0x0,
 }
 
-impl solana_program::program_error::PrintProgramError for SolanaFeatureGateError {
-    fn print<E>(&self) {
-        solana_program::msg!(&self.to_string());
-    }
-}
-
-impl<T> solana_program::decode_error::DecodeError<T> for SolanaFeatureGateError {
-    fn type_of() -> &'static str {
-        "SolanaFeatureGateError"
+impl From<SolanaFeatureGateError> for solana_program_error::ProgramError {
+    fn from(e: SolanaFeatureGateError) -> Self {
+        solana_program_error::ProgramError::Custom(e as u32)
     }
 }

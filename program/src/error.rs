@@ -18,7 +18,7 @@ pub enum FeatureGateError {
 }
 
 impl ToStr for FeatureGateError {
-    fn to_str<E>(&self) -> &'static str {
+    fn to_str(&self) -> &'static str {
         match self {
             FeatureGateError::FeatureAlreadyActivated => "Feature already activated",
         }
