@@ -15,7 +15,7 @@ program-id = "Feature111111111111111111111111111111111111"
 num_enum = "0.7.4"
 num-derive = "0.4"
 num-traits = "0.2"
-shank = "0.4.2"
+shank = "0.4.5"
 solana-account-info = "3.0.0"
 solana-cpi = "3.0.0"
 solana-feature-gate-interface = { version = "3.0.0", features = ["bincode"] }
