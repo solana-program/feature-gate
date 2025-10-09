@@ -2550,7 +2550,7 @@ dependencies = [
  "num-traits",
  "serde",
  "serde_with",
- "solana-account-info 2.3.0",
+ "solana-account-info 3.0.0",
  "solana-cpi 2.2.1",
  "solana-instruction 2.3.0",
  "solana-program-error 2.2.2",
