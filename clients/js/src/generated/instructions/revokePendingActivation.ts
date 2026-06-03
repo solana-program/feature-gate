@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,12 +30,15 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from '@solana/kit';
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from '@solana/kit/program-client-core';
 import { SOLANA_FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
-import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
 export const REVOKE_PENDING_ACTIVATION_DISCRIMINATOR = 0;
 
-export function getRevokePendingActivationDiscriminatorBytes() {
+export function getRevokePendingActivationDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(REVOKE_PENDING_ACTIVATION_DISCRIMINATOR);
 }
 
@@ -41,9 +46,8 @@ export type RevokePendingActivationInstruction<
   TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
   TAccountFeature extends string | AccountMeta<string> = string,
   TAccountIncinerator extends string | AccountMeta<string> = string,
-  TAccountSystemProgram extends
-    | string
-    | AccountMeta<string> = '11111111111111111111111111111111',
+  TAccountSystemProgram extends string | AccountMeta<string> =
+    '11111111111111111111111111111111',
   TRemainingAccounts extends readonly AccountMeta<string>[] = [],
 > = Instruction<TProgram> &
   InstructionWithData<ReadonlyUint8Array> &
@@ -134,7 +138,7 @@ export function getRevokePendingActivationInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -146,9 +150,9 @@ export function getRevokePendingActivationInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.feature),
-      getAccountMeta(accounts.incinerator),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta('feature', accounts.feature),
+      getAccountMeta('incinerator', accounts.incinerator),
+      getAccountMeta('systemProgram', accounts.systemProgram),
     ],
     data: getRevokePendingActivationInstructionDataEncoder().encode({}),
     programAddress,
@@ -185,8 +189,13 @@ export function parseRevokePendingActivationInstruction<
     InstructionWithData<ReadonlyUint8Array>
 ): ParsedRevokePendingActivationInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
-    // TODO: Coded error.
-    throw new Error('Not enough accounts');
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 3,
+      }
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

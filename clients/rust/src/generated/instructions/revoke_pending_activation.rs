@@ -12,11 +12,11 @@ pub const REVOKE_PENDING_ACTIVATION_DISCRIMINATOR: u8 = 0;
 #[derive(Debug)]
 pub struct RevokePendingActivation {
     /// The feature account to revoke
-    pub feature: solana_pubkey::Pubkey,
+    pub feature: solana_address::Address,
     /// The incinerator account
-    pub incinerator: solana_pubkey::Pubkey,
+    pub incinerator: solana_address::Address,
     /// The system program
-    pub system_program: solana_pubkey::Pubkey,
+    pub system_program: solana_address::Address,
 }
 
 impl RevokePendingActivation {
@@ -53,7 +53,6 @@ impl RevokePendingActivation {
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RevokePendingActivationInstructionData {
     discriminator: u8,
 }
@@ -84,9 +83,9 @@ impl Default for RevokePendingActivationInstructionData {
 ///      `11111111111111111111111111111111`)
 #[derive(Clone, Debug, Default)]
 pub struct RevokePendingActivationBuilder {
-    feature: Option<solana_pubkey::Pubkey>,
-    incinerator: Option<solana_pubkey::Pubkey>,
-    system_program: Option<solana_pubkey::Pubkey>,
+    feature: Option<solana_address::Address>,
+    incinerator: Option<solana_address::Address>,
+    system_program: Option<solana_address::Address>,
     __remaining_accounts: Vec<solana_instruction::AccountMeta>,
 }
 
@@ -96,20 +95,20 @@ impl RevokePendingActivationBuilder {
     }
     /// The feature account to revoke
     #[inline(always)]
-    pub fn feature(&mut self, feature: solana_pubkey::Pubkey) -> &mut Self {
+    pub fn feature(&mut self, feature: solana_address::Address) -> &mut Self {
         self.feature = Some(feature);
         self
     }
     /// The incinerator account
     #[inline(always)]
-    pub fn incinerator(&mut self, incinerator: solana_pubkey::Pubkey) -> &mut Self {
+    pub fn incinerator(&mut self, incinerator: solana_address::Address) -> &mut Self {
         self.incinerator = Some(incinerator);
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
     /// The system program
     #[inline(always)]
-    pub fn system_program(&mut self, system_program: solana_pubkey::Pubkey) -> &mut Self {
+    pub fn system_program(&mut self, system_program: solana_address::Address) -> &mut Self {
         self.system_program = Some(system_program);
         self
     }
@@ -135,7 +134,7 @@ impl RevokePendingActivationBuilder {
             incinerator: self.incinerator.expect("incinerator is not set"),
             system_program: self
                 .system_program
-                .unwrap_or(solana_pubkey::pubkey!("11111111111111111111111111111111")),
+                .unwrap_or(solana_address::address!("11111111111111111111111111111111")),
         };
 
         accounts.instruction_with_remaining_accounts(&self.__remaining_accounts)

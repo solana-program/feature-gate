@@ -4,7 +4,7 @@
 //!
 //! <https://github.com/codama-idl/codama>
 
-use solana_pubkey::{pubkey, Pubkey};
+use solana_address::{address, Address};
 
 /// `solana_feature_gate` program ID.
-pub const SOLANA_FEATURE_GATE_ID: Pubkey = pubkey!("Feature111111111111111111111111111111111111");
+pub const SOLANA_FEATURE_GATE_ID: Address = address!("Feature111111111111111111111111111111111111");
