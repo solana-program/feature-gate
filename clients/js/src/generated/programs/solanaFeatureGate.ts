@@ -7,12 +7,30 @@
  */
 
 import {
+  assertIsInstructionWithAccounts,
   containsBytes,
+  extendClient,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+  SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+  SolanaError,
   type Address,
+  type ClientWithTransactionPlanning,
+  type ClientWithTransactionSending,
+  type Instruction,
+  type InstructionWithData,
   type ReadonlyUint8Array,
 } from '@solana/kit';
-import { type ParsedRevokePendingActivationInstruction } from '../instructions';
+import {
+  addSelfPlanAndSendFunctions,
+  type SelfPlanAndSendFunctions,
+} from '@solana/kit/program-client-core';
+import {
+  getRevokePendingActivationInstruction,
+  parseRevokePendingActivationInstruction,
+  type ParsedRevokePendingActivationInstruction,
+  type RevokePendingActivationInput,
+} from '../instructions';
 
 export const SOLANA_FEATURE_GATE_PROGRAM_ADDRESS =
   'Feature111111111111111111111111111111111111' as Address<'Feature111111111111111111111111111111111111'>;
@@ -28,8 +46,9 @@ export function identifySolanaFeatureGateInstruction(
   if (containsBytes(data, getU8Encoder().encode(0), 0)) {
     return SolanaFeatureGateInstruction.RevokePendingActivation;
   }
-  throw new Error(
-    'The provided instruction could not be identified as a solanaFeatureGate instruction.'
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+    { instructionData: data, programName: 'solanaFeatureGate' }
   );
 }
 
@@ -38,3 +57,60 @@ export type ParsedSolanaFeatureGateInstruction<
 > = {
   instructionType: SolanaFeatureGateInstruction.RevokePendingActivation;
 } & ParsedRevokePendingActivationInstruction<TProgram>;
+
+export function parseSolanaFeatureGateInstruction<TProgram extends string>(
+  instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>
+): ParsedSolanaFeatureGateInstruction<TProgram> {
+  const instructionType = identifySolanaFeatureGateInstruction(instruction);
+  switch (instructionType) {
+    case SolanaFeatureGateInstruction.RevokePendingActivation: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SolanaFeatureGateInstruction.RevokePendingActivation,
+        ...parseRevokePendingActivationInstruction(instruction),
+      };
+    }
+    default:
+      throw new SolanaError(
+        SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+        {
+          instructionType: instructionType as string,
+          programName: 'solanaFeatureGate',
+        }
+      );
+  }
+}
+
+export type SolanaFeatureGatePlugin = {
+  instructions: SolanaFeatureGatePluginInstructions;
+};
+
+export type SolanaFeatureGatePluginInstructions = {
+  revokePendingActivation: (
+    input: RevokePendingActivationInput
+  ) => ReturnType<typeof getRevokePendingActivationInstruction> &
+    SelfPlanAndSendFunctions;
+};
+
+export type SolanaFeatureGatePluginRequirements =
+  ClientWithTransactionPlanning & ClientWithTransactionSending;
+
+export function solanaFeatureGateProgram() {
+  return <T extends SolanaFeatureGatePluginRequirements>(
+    client: T
+  ): Omit<T, 'solanaFeatureGate'> & {
+    solanaFeatureGate: SolanaFeatureGatePlugin;
+  } => {
+    return extendClient(client, {
+      solanaFeatureGate: <SolanaFeatureGatePlugin>{
+        instructions: {
+          revokePendingActivation: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getRevokePendingActivationInstruction(input)
+            ),
+        },
+      },
+    });
+  };
+}

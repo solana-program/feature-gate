@@ -23,7 +23,7 @@ export type SolanaFeatureGateError =
 let solanaFeatureGateErrorMessages:
   | Record<SolanaFeatureGateError, string>
   | undefined;
-if (process.env.NODE_ENV !== 'production') {
+if (process.env['NODE_ENV'] !== 'production') {
   solanaFeatureGateErrorMessages = {
     [SOLANA_FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED]: `Feature already activated`,
   };
@@ -32,7 +32,7 @@ if (process.env.NODE_ENV !== 'production') {
 export function getSolanaFeatureGateErrorMessage(
   code: SolanaFeatureGateError
 ): string {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env['NODE_ENV'] !== 'production') {
     return (
       solanaFeatureGateErrorMessages as Record<SolanaFeatureGateError, string>
     )[code];
