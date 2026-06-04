@@ -3,11 +3,11 @@
 use {
     crate::{error::FeatureGateError, instruction::FeatureGateInstruction},
     solana_account_info::{next_account_info, AccountInfo},
+    solana_address::Address,
     solana_cpi::invoke,
     solana_feature_gate_interface::Feature,
     solana_msg::msg,
     solana_program_error::{ProgramError, ProgramResult},
-    solana_pubkey::Pubkey,
     solana_sdk_ids::incinerator,
     solana_system_interface::{instruction as system_instruction, program as system_program},
 };
@@ -15,7 +15,7 @@ use {
 /// Processes a [`RevokePendingActivation`](enum.FeatureGateInstruction.html)
 /// instruction.
 pub fn process_revoke_pending_activation(
-    _program_id: &Pubkey,
+    _program_id: &Address,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -51,7 +51,7 @@ pub fn process_revoke_pending_activation(
 }
 
 /// Processes an [Instruction](enum.Instruction.html).
-pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
+pub fn process(program_id: &Address, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
     let instruction = FeatureGateInstruction::unpack(input)?;
     match instruction {
         FeatureGateInstruction::RevokePendingActivation => {
