@@ -3,14 +3,14 @@
 use {
     crate::{error::FeatureGateError, processor},
     solana_account_info::AccountInfo,
+    solana_address::Address,
     solana_msg::msg,
     solana_program_error::ProgramResult,
-    solana_pubkey::Pubkey,
 };
 
 solana_program_entrypoint::entrypoint!(process_instruction);
 fn process_instruction(
-    program_id: &Pubkey,
+    program_id: &Address,
     accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {

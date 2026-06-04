@@ -4,18 +4,18 @@ use {
     mollusk_svm::{program::keyed_account_for_system_program, result::Check},
     setup::{active_feature_account, pending_feature_account, setup},
     solana_account::{Account, WritableAccount},
+    solana_address::Address,
     solana_feature_gate_program::{
         error::FeatureGateError, instruction::revoke_pending_activation,
     },
     solana_program_error::ProgramError,
-    solana_pubkey::Pubkey,
     solana_sdk_ids::incinerator,
 };
 
 #[test]
 fn fail_feature_not_signer() {
     let mollusk = setup();
-    let feature = Pubkey::new_unique();
+    let feature = Address::new_unique();
 
     let mut instruction = revoke_pending_activation(&feature);
     instruction.accounts[0].is_signer = false;
@@ -34,11 +34,11 @@ fn fail_feature_not_signer() {
 #[test]
 fn fail_feature_incorrect_owner() {
     let mollusk = setup();
-    let feature = Pubkey::new_unique();
+    let feature = Address::new_unique();
 
     // Set up a feature account with incorrect owner.
     let mut feature_account = pending_feature_account();
-    feature_account.set_owner(Pubkey::new_unique());
+    feature_account.set_owner(Address::new_unique());
 
     mollusk.process_and_validate_instruction(
         &revoke_pending_activation(&feature),
@@ -54,7 +54,7 @@ fn fail_feature_incorrect_owner() {
 #[test]
 fn fail_feature_invalid_data() {
     let mollusk = setup();
-    let feature = Pubkey::new_unique();
+    let feature = Address::new_unique();
 
     // Set up a feature account with invalid data.
     let mut feature_account = pending_feature_account();
@@ -74,7 +74,7 @@ fn fail_feature_invalid_data() {
 #[test]
 fn fail_feature_already_activated() {
     let mollusk = setup();
-    let feature = Pubkey::new_unique();
+    let feature = Address::new_unique();
 
     mollusk.process_and_validate_instruction(
         &revoke_pending_activation(&feature),
@@ -92,7 +92,7 @@ fn fail_feature_already_activated() {
 #[test]
 fn success() {
     let mollusk = setup();
-    let feature = Pubkey::new_unique();
+    let feature = Address::new_unique();
 
     mollusk.process_and_validate_instruction(
         &revoke_pending_activation(&feature),
@@ -103,7 +103,7 @@ fn success() {
         ],
         &[
             Check::success(),
-            Check::compute_units(2_777),
+            Check::compute_units(2_723),
             // Confirm feature account was closed.
             Check::account(&feature).closed().build(),
         ],

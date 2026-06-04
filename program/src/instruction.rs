@@ -3,9 +3,9 @@
 use {
     num_enum::{IntoPrimitive, TryFromPrimitive},
     shank::ShankInstruction,
+    solana_address::Address,
     solana_instruction::{AccountMeta, Instruction},
     solana_program_error::ProgramError,
-    solana_pubkey::Pubkey,
     solana_sdk_ids::incinerator,
     solana_system_interface::program as system_program,
 };
@@ -68,7 +68,7 @@ impl FeatureGateInstruction {
 }
 
 /// Creates a `RevokePendingActivation` instruction.
-pub fn revoke_pending_activation(feature_id: &Pubkey) -> Instruction {
+pub fn revoke_pending_activation(feature_id: &Address) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*feature_id, true),
         AccountMeta::new(incinerator::id(), false),

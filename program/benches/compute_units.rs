@@ -4,9 +4,9 @@ use {
     mollusk_svm::{program::keyed_account_for_system_program, Mollusk},
     mollusk_svm_bencher::{Bench, MolluskComputeUnitBencher},
     solana_account::Account,
+    solana_address::Address,
     solana_feature_gate_interface::Feature,
     solana_feature_gate_program::instruction::revoke_pending_activation,
-    solana_pubkey::Pubkey,
     solana_sdk_ids::incinerator,
 };
 
@@ -17,7 +17,7 @@ fn main() {
         "solana_feature_gate_program",
     );
 
-    let feature = Pubkey::new_unique();
+    let feature = Address::new_unique();
 
     let bench: Bench = (
         "revoke_pending_activation",

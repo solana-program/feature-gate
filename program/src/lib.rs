@@ -9,4 +9,4 @@ pub mod error;
 pub mod instruction;
 pub mod processor;
 
-solana_pubkey::declare_id!("Feature111111111111111111111111111111111111");
+solana_address::declare_id!("Feature111111111111111111111111111111111111");
