@@ -32,7 +32,7 @@ thiserror = "2.0.9"
 mollusk-svm = "0.12.0"
 mollusk-svm-bencher = "0.12.0"
 solana-account = "3.4.0"
-solana-address = { version = "2.6.0", features = ["dev-context-only-utils"] }
+solana-address = { version = "2.6.0", features = ["atomic"] }
 solana-rent = "4.2.0"
 
 [lib]
