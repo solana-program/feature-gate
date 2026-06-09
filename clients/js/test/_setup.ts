@@ -4,12 +4,9 @@ import { createClient, lamports } from '@solana/kit';
 import { litesvm } from '@solana/kit-plugin-litesvm';
 import { airdropSigner, generatedSigner } from '@solana/kit-plugin-signer';
 
-import {
-  SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
-  solanaFeatureGateProgram,
-} from '../src';
+import { FEATURE_GATE_PROGRAM_ADDRESS, featureGateProgram } from '../src';
 
-const SOLANA_FEATURE_GATE_BINARY_PATH = path.resolve(
+const FEATURE_GATE_BINARY_PATH = path.resolve(
   __dirname,
   '..',
   '..',
@@ -29,10 +26,10 @@ export const createTestClient = () => {
       // compiled `.so` file. This must run after the `litesvm()` plugin so
       // that `client.svm` is available.
       client.svm.addProgramFromFile(
-        SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
-        SOLANA_FEATURE_GATE_BINARY_PATH
+        FEATURE_GATE_PROGRAM_ADDRESS,
+        FEATURE_GATE_BINARY_PATH
       );
       return client;
     })
-    .use(solanaFeatureGateProgram());
+    .use(featureGateProgram());
 };

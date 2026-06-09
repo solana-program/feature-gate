@@ -34,7 +34,7 @@ import {
   getAccountMetaFactory,
   type ResolvedInstructionAccount,
 } from '@solana/kit/program-client-core';
-import { SOLANA_FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
+import { FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
 
 export const REVOKE_PENDING_ACTIVATION_DISCRIMINATOR = 0;
 
@@ -43,7 +43,7 @@ export function getRevokePendingActivationDiscriminatorBytes(): ReadonlyUint8Arr
 }
 
 export type RevokePendingActivationInstruction<
-  TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
+  TProgram extends string = typeof FEATURE_GATE_PROGRAM_ADDRESS,
   TAccountFeature extends string | AccountMeta<string> = string,
   TAccountIncinerator extends string | AccountMeta<string> = string,
   TAccountSystemProgram extends string | AccountMeta<string> =
@@ -112,7 +112,7 @@ export function getRevokePendingActivationInstruction<
   TAccountFeature extends string,
   TAccountIncinerator extends string,
   TAccountSystemProgram extends string,
-  TProgramAddress extends Address = typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
+  TProgramAddress extends Address = typeof FEATURE_GATE_PROGRAM_ADDRESS,
 >(
   input: RevokePendingActivationInput<
     TAccountFeature,
@@ -127,8 +127,7 @@ export function getRevokePendingActivationInstruction<
   TAccountSystemProgram
 > {
   // Program address.
-  const programAddress =
-    config?.programAddress ?? SOLANA_FEATURE_GATE_PROGRAM_ADDRESS;
+  const programAddress = config?.programAddress ?? FEATURE_GATE_PROGRAM_ADDRESS;
 
   // Original accounts.
   const originalAccounts = {
@@ -165,7 +164,7 @@ export function getRevokePendingActivationInstruction<
 }
 
 export type ParsedRevokePendingActivationInstruction<
-  TProgram extends string = typeof SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
+  TProgram extends string = typeof FEATURE_GATE_PROGRAM_ADDRESS,
   TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[],
 > = {
   programAddress: Address<TProgram>;

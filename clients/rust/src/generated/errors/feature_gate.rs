@@ -7,14 +7,14 @@
 use {num_derive::FromPrimitive, thiserror::Error};
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
-pub enum SolanaFeatureGateError {
+pub enum FeatureGateError {
     /// 0 - Feature already activated
     #[error("Feature already activated")]
     FeatureAlreadyActivated = 0x0,
 }
 
-impl From<SolanaFeatureGateError> for solana_program_error::ProgramError {
-    fn from(e: SolanaFeatureGateError) -> Self {
+impl From<FeatureGateError> for solana_program_error::ProgramError {
+    fn from(e: FeatureGateError) -> Self {
         solana_program_error::ProgramError::Custom(e as u32)
     }
 }

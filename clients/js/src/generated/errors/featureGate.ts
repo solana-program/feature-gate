@@ -12,38 +12,30 @@ import {
   type SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
   type SolanaError,
 } from '@solana/kit';
-import { SOLANA_FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
+import { FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
 
 /** FeatureAlreadyActivated: Feature already activated */
-export const SOLANA_FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED = 0x0; // 0
+export const FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED = 0x0; // 0
 
-export type SolanaFeatureGateError =
-  typeof SOLANA_FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED;
+export type FeatureGateError =
+  typeof FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED;
 
-let solanaFeatureGateErrorMessages:
-  | Record<SolanaFeatureGateError, string>
-  | undefined;
+let featureGateErrorMessages: Record<FeatureGateError, string> | undefined;
 if (process.env['NODE_ENV'] !== 'production') {
-  solanaFeatureGateErrorMessages = {
-    [SOLANA_FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED]: `Feature already activated`,
+  featureGateErrorMessages = {
+    [FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED]: `Feature already activated`,
   };
 }
 
-export function getSolanaFeatureGateErrorMessage(
-  code: SolanaFeatureGateError
-): string {
+export function getFeatureGateErrorMessage(code: FeatureGateError): string {
   if (process.env['NODE_ENV'] !== 'production') {
-    return (
-      solanaFeatureGateErrorMessages as Record<SolanaFeatureGateError, string>
-    )[code];
+    return (featureGateErrorMessages as Record<FeatureGateError, string>)[code];
   }
 
   return 'Error message not available in production bundles.';
 }
 
-export function isSolanaFeatureGateError<
-  TProgramErrorCode extends SolanaFeatureGateError,
->(
+export function isFeatureGateError<TProgramErrorCode extends FeatureGateError>(
   error: unknown,
   transactionMessage: {
     instructions: Record<number, { programAddress: Address }>;
@@ -54,7 +46,7 @@ export function isSolanaFeatureGateError<
   return isProgramError<TProgramErrorCode>(
     error,
     transactionMessage,
-    SOLANA_FEATURE_GATE_PROGRAM_ADDRESS,
+    FEATURE_GATE_PROGRAM_ADDRESS,
     code
   );
 }
