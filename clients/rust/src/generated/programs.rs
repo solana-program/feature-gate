@@ -6,5 +6,5 @@
 
 use solana_address::{address, Address};
 
-/// `solana_feature_gate` program ID.
-pub const SOLANA_FEATURE_GATE_ID: Address = address!("Feature111111111111111111111111111111111111");
+/// `feature_gate` program ID.
+pub const FEATURE_GATE_ID: Address = address!("Feature111111111111111111111111111111111111");

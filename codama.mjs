@@ -10,7 +10,7 @@ export default {
   before: [
     {
       from: 'codama#updateProgramsVisitor',
-      args: [{ solanaFeatureGateProgram: { name: 'solanaFeatureGate' } }],
+      args: [{ solanaFeatureGateProgram: { name: 'featureGate' } }],
     },
   ],
   scripts: {

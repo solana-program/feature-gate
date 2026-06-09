@@ -4,6 +4,6 @@
 //!
 //! <https://github.com/codama-idl/codama>
 
-pub(crate) mod solana_feature_gate;
+pub(crate) mod feature_gate;
 
-pub use self::solana_feature_gate::SolanaFeatureGateError;
+pub use self::feature_gate::FeatureGateError;

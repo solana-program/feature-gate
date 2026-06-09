@@ -32,41 +32,41 @@ import {
   type RevokePendingActivationInput,
 } from '../instructions';
 
-export const SOLANA_FEATURE_GATE_PROGRAM_ADDRESS =
+export const FEATURE_GATE_PROGRAM_ADDRESS =
   'Feature111111111111111111111111111111111111' as Address<'Feature111111111111111111111111111111111111'>;
 
-export enum SolanaFeatureGateInstruction {
+export enum FeatureGateInstruction {
   RevokePendingActivation,
 }
 
-export function identifySolanaFeatureGateInstruction(
+export function identifyFeatureGateInstruction(
   instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array
-): SolanaFeatureGateInstruction {
+): FeatureGateInstruction {
   const data = 'data' in instruction ? instruction.data : instruction;
   if (containsBytes(data, getU8Encoder().encode(0), 0)) {
-    return SolanaFeatureGateInstruction.RevokePendingActivation;
+    return FeatureGateInstruction.RevokePendingActivation;
   }
   throw new SolanaError(
     SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
-    { instructionData: data, programName: 'solanaFeatureGate' }
+    { instructionData: data, programName: 'featureGate' }
   );
 }
 
-export type ParsedSolanaFeatureGateInstruction<
+export type ParsedFeatureGateInstruction<
   TProgram extends string = 'Feature111111111111111111111111111111111111',
 > = {
-  instructionType: SolanaFeatureGateInstruction.RevokePendingActivation;
+  instructionType: FeatureGateInstruction.RevokePendingActivation;
 } & ParsedRevokePendingActivationInstruction<TProgram>;
 
-export function parseSolanaFeatureGateInstruction<TProgram extends string>(
+export function parseFeatureGateInstruction<TProgram extends string>(
   instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>
-): ParsedSolanaFeatureGateInstruction<TProgram> {
-  const instructionType = identifySolanaFeatureGateInstruction(instruction);
+): ParsedFeatureGateInstruction<TProgram> {
+  const instructionType = identifyFeatureGateInstruction(instruction);
   switch (instructionType) {
-    case SolanaFeatureGateInstruction.RevokePendingActivation: {
+    case FeatureGateInstruction.RevokePendingActivation: {
       assertIsInstructionWithAccounts(instruction);
       return {
-        instructionType: SolanaFeatureGateInstruction.RevokePendingActivation,
+        instructionType: FeatureGateInstruction.RevokePendingActivation,
         ...parseRevokePendingActivationInstruction(instruction),
       };
     }
@@ -75,34 +75,30 @@ export function parseSolanaFeatureGateInstruction<TProgram extends string>(
         SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
         {
           instructionType: instructionType as string,
-          programName: 'solanaFeatureGate',
+          programName: 'featureGate',
         }
       );
   }
 }
 
-export type SolanaFeatureGatePlugin = {
-  instructions: SolanaFeatureGatePluginInstructions;
-};
+export type FeatureGatePlugin = { instructions: FeatureGatePluginInstructions };
 
-export type SolanaFeatureGatePluginInstructions = {
+export type FeatureGatePluginInstructions = {
   revokePendingActivation: (
     input: RevokePendingActivationInput
   ) => ReturnType<typeof getRevokePendingActivationInstruction> &
     SelfPlanAndSendFunctions;
 };
 
-export type SolanaFeatureGatePluginRequirements =
-  ClientWithTransactionPlanning & ClientWithTransactionSending;
+export type FeatureGatePluginRequirements = ClientWithTransactionPlanning &
+  ClientWithTransactionSending;
 
-export function solanaFeatureGateProgram() {
-  return <T extends SolanaFeatureGatePluginRequirements>(
+export function featureGateProgram() {
+  return <T extends FeatureGatePluginRequirements>(
     client: T
-  ): Omit<T, 'solanaFeatureGate'> & {
-    solanaFeatureGate: SolanaFeatureGatePlugin;
-  } => {
+  ): Omit<T, 'featureGate'> & { featureGate: FeatureGatePlugin } => {
     return extendClient(client, {
-      solanaFeatureGate: <SolanaFeatureGatePlugin>{
+      featureGate: <FeatureGatePlugin>{
         instructions: {
           revokePendingActivation: (input) =>
             addSelfPlanAndSendFunctions(

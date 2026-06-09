@@ -7,7 +7,7 @@ it('sets up a LiteSVM client with the feature-gate program', async () => {
   const client = await createTestClient();
 
   // Then the client exposes the feature-gate program plugin.
-  expect(client.solanaFeatureGate).toBeDefined();
+  expect(client.featureGate).toBeDefined();
 
   // And the payer was funded via LiteSVM.
   const { value: balance } = await client.rpc
