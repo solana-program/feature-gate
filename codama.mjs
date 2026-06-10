@@ -6,7 +6,7 @@ const nightly = cargo?.workspace?.metadata?.toolchains?.format;
 const prettierOptions = JSON.parse(readFileSync('clients/js/.prettierrc.json', 'utf-8'));
 
 export default {
-  idl: 'program/idl.json',
+  idl: 'idl.json',
   before: [
     {
       from: 'codama#updateProgramsVisitor',
