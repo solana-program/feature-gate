@@ -7,106 +7,93 @@
  */
 
 import {
-  assertIsInstructionWithAccounts,
-  containsBytes,
-  extendClient,
-  getU8Encoder,
-  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
-  SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
-  SolanaError,
-  type Address,
-  type ClientWithTransactionPlanning,
-  type ClientWithTransactionSending,
-  type Instruction,
-  type InstructionWithData,
-  type ReadonlyUint8Array,
+    assertIsInstructionWithAccounts,
+    containsBytes,
+    extendClient,
+    getU8Encoder,
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+    SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+    SolanaError,
+    type Address,
+    type ClientWithTransactionPlanning,
+    type ClientWithTransactionSending,
+    type Instruction,
+    type InstructionWithData,
+    type ReadonlyUint8Array,
 } from '@solana/kit';
+import { addSelfPlanAndSendFunctions, type SelfPlanAndSendFunctions } from '@solana/kit/program-client-core';
 import {
-  addSelfPlanAndSendFunctions,
-  type SelfPlanAndSendFunctions,
-} from '@solana/kit/program-client-core';
-import {
-  getRevokePendingActivationInstruction,
-  parseRevokePendingActivationInstruction,
-  type ParsedRevokePendingActivationInstruction,
-  type RevokePendingActivationInput,
+    getRevokePendingActivationInstruction,
+    parseRevokePendingActivationInstruction,
+    type ParsedRevokePendingActivationInstruction,
+    type RevokePendingActivationInput,
 } from '../instructions';
 
 export const FEATURE_GATE_PROGRAM_ADDRESS =
-  'Feature111111111111111111111111111111111111' as Address<'Feature111111111111111111111111111111111111'>;
+    'Feature111111111111111111111111111111111111' as Address<'Feature111111111111111111111111111111111111'>;
 
 export enum FeatureGateInstruction {
-  RevokePendingActivation,
+    RevokePendingActivation,
 }
 
 export function identifyFeatureGateInstruction(
-  instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array
+    instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array,
 ): FeatureGateInstruction {
-  const data = 'data' in instruction ? instruction.data : instruction;
-  if (containsBytes(data, getU8Encoder().encode(0), 0)) {
-    return FeatureGateInstruction.RevokePendingActivation;
-  }
-  throw new SolanaError(
-    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
-    { instructionData: data, programName: 'featureGate' }
-  );
+    const data = 'data' in instruction ? instruction.data : instruction;
+    if (containsBytes(data, getU8Encoder().encode(0), 0)) {
+        return FeatureGateInstruction.RevokePendingActivation;
+    }
+    throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION, {
+        instructionData: data,
+        programName: 'featureGate',
+    });
 }
 
-export type ParsedFeatureGateInstruction<
-  TProgram extends string = 'Feature111111111111111111111111111111111111',
-> = {
-  instructionType: FeatureGateInstruction.RevokePendingActivation;
+export type ParsedFeatureGateInstruction<TProgram extends string = 'Feature111111111111111111111111111111111111'> = {
+    instructionType: FeatureGateInstruction.RevokePendingActivation;
 } & ParsedRevokePendingActivationInstruction<TProgram>;
 
 export function parseFeatureGateInstruction<TProgram extends string>(
-  instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>
+    instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
 ): ParsedFeatureGateInstruction<TProgram> {
-  const instructionType = identifyFeatureGateInstruction(instruction);
-  switch (instructionType) {
-    case FeatureGateInstruction.RevokePendingActivation: {
-      assertIsInstructionWithAccounts(instruction);
-      return {
-        instructionType: FeatureGateInstruction.RevokePendingActivation,
-        ...parseRevokePendingActivationInstruction(instruction),
-      };
-    }
-    default:
-      throw new SolanaError(
-        SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
-        {
-          instructionType: instructionType as string,
-          programName: 'featureGate',
+    const instructionType = identifyFeatureGateInstruction(instruction);
+    switch (instructionType) {
+        case FeatureGateInstruction.RevokePendingActivation: {
+            assertIsInstructionWithAccounts(instruction);
+            return {
+                instructionType: FeatureGateInstruction.RevokePendingActivation,
+                ...parseRevokePendingActivationInstruction(instruction),
+            };
         }
-      );
-  }
+        default:
+            throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE, {
+                instructionType: instructionType as string,
+                programName: 'featureGate',
+            });
+    }
 }
 
 export type FeatureGatePlugin = { instructions: FeatureGatePluginInstructions };
 
 export type FeatureGatePluginInstructions = {
-  revokePendingActivation: (
-    input: RevokePendingActivationInput
-  ) => ReturnType<typeof getRevokePendingActivationInstruction> &
-    SelfPlanAndSendFunctions;
+    revokePendingActivation: (
+        input: RevokePendingActivationInput,
+    ) => ReturnType<typeof getRevokePendingActivationInstruction> & SelfPlanAndSendFunctions;
 };
 
-export type FeatureGatePluginRequirements = ClientWithTransactionPlanning &
-  ClientWithTransactionSending;
+export type FeatureGatePluginRequirements = ClientWithTransactionPlanning & ClientWithTransactionSending;
 
 export function featureGateProgram() {
-  return <T extends FeatureGatePluginRequirements>(
-    client: T
-  ): Omit<T, 'featureGate'> & { featureGate: FeatureGatePlugin } => {
-    return extendClient(client, {
-      featureGate: <FeatureGatePlugin>{
-        instructions: {
-          revokePendingActivation: (input) =>
-            addSelfPlanAndSendFunctions(
-              client,
-              getRevokePendingActivationInstruction(input)
-            ),
-        },
-      },
-    });
-  };
+    return <T extends FeatureGatePluginRequirements>(
+        client: T,
+    ): Omit<T, 'featureGate'> & { featureGate: FeatureGatePlugin } => {
+        return extendClient(client, {
+            featureGate: <FeatureGatePlugin>{
+                instructions: {
+                    revokePendingActivation: input =>
+                        addSelfPlanAndSendFunctions(client, getRevokePendingActivationInstruction(input)),
+                },
+            },
+        });
+    };
 }

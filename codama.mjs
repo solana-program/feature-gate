@@ -3,7 +3,13 @@ import { parse as parseToml } from '@iarna/toml';
 
 const cargo = parseToml(readFileSync('Cargo.toml', 'utf-8'));
 const nightly = cargo?.workspace?.metadata?.toolchains?.format;
-const prettierOptions = JSON.parse(readFileSync('clients/js/.prettierrc.json', 'utf-8'));
+const prettierOptions = {
+  arrowParens: 'avoid',
+  printWidth: 120,
+  singleQuote: true,
+  tabWidth: 4,
+  trailingComma: 'all',
+};
 
 export default {
   idl: 'idl.json',
