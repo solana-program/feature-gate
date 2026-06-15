@@ -7,46 +7,36 @@
  */
 
 import {
-  isProgramError,
-  type Address,
-  type SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
-  type SolanaError,
+    isProgramError,
+    type Address,
+    type SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM,
+    type SolanaError,
 } from '@solana/kit';
 import { FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
 
 /** FeatureAlreadyActivated: Feature already activated */
 export const FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED = 0x0; // 0
 
-export type FeatureGateError =
-  typeof FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED;
+export type FeatureGateError = typeof FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED;
 
 let featureGateErrorMessages: Record<FeatureGateError, string> | undefined;
 if (process.env['NODE_ENV'] !== 'production') {
-  featureGateErrorMessages = {
-    [FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED]: `Feature already activated`,
-  };
+    featureGateErrorMessages = { [FEATURE_GATE_ERROR__FEATURE_ALREADY_ACTIVATED]: `Feature already activated` };
 }
 
 export function getFeatureGateErrorMessage(code: FeatureGateError): string {
-  if (process.env['NODE_ENV'] !== 'production') {
-    return (featureGateErrorMessages as Record<FeatureGateError, string>)[code];
-  }
+    if (process.env['NODE_ENV'] !== 'production') {
+        return (featureGateErrorMessages as Record<FeatureGateError, string>)[code];
+    }
 
-  return 'Error message not available in production bundles.';
+    return 'Error message not available in production bundles.';
 }
 
 export function isFeatureGateError<TProgramErrorCode extends FeatureGateError>(
-  error: unknown,
-  transactionMessage: {
-    instructions: Record<number, { programAddress: Address }>;
-  },
-  code?: TProgramErrorCode
+    error: unknown,
+    transactionMessage: { instructions: Record<number, { programAddress: Address }> },
+    code?: TProgramErrorCode,
 ): error is SolanaError<typeof SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM> &
-  Readonly<{ context: Readonly<{ code: TProgramErrorCode }> }> {
-  return isProgramError<TProgramErrorCode>(
-    error,
-    transactionMessage,
-    FEATURE_GATE_PROGRAM_ADDRESS,
-    code
-  );
+    Readonly<{ context: Readonly<{ code: TProgramErrorCode }> }> {
+    return isProgramError<TProgramErrorCode>(error, transactionMessage, FEATURE_GATE_PROGRAM_ADDRESS, code);
 }

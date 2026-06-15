@@ -7,210 +7,177 @@
  */
 
 import {
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
-  getU8Decoder,
-  getU8Encoder,
-  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
-  SolanaError,
-  transformEncoder,
-  type AccountMeta,
-  type AccountSignerMeta,
-  type Address,
-  type FixedSizeCodec,
-  type FixedSizeDecoder,
-  type FixedSizeEncoder,
-  type Instruction,
-  type InstructionWithAccounts,
-  type InstructionWithData,
-  type ReadonlyAccount,
-  type ReadonlyUint8Array,
-  type TransactionSigner,
-  type WritableAccount,
-  type WritableSignerAccount,
+    combineCodec,
+    getStructDecoder,
+    getStructEncoder,
+    getU8Decoder,
+    getU8Encoder,
+    SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+    SolanaError,
+    transformEncoder,
+    type AccountMeta,
+    type AccountSignerMeta,
+    type Address,
+    type FixedSizeCodec,
+    type FixedSizeDecoder,
+    type FixedSizeEncoder,
+    type Instruction,
+    type InstructionWithAccounts,
+    type InstructionWithData,
+    type ReadonlyAccount,
+    type ReadonlyUint8Array,
+    type TransactionSigner,
+    type WritableAccount,
+    type WritableSignerAccount,
 } from '@solana/kit';
-import {
-  getAccountMetaFactory,
-  type ResolvedInstructionAccount,
-} from '@solana/kit/program-client-core';
+import { getAccountMetaFactory, type ResolvedInstructionAccount } from '@solana/kit/program-client-core';
 import { FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
 
 export const REVOKE_PENDING_ACTIVATION_DISCRIMINATOR = 0;
 
 export function getRevokePendingActivationDiscriminatorBytes(): ReadonlyUint8Array {
-  return getU8Encoder().encode(REVOKE_PENDING_ACTIVATION_DISCRIMINATOR);
+    return getU8Encoder().encode(REVOKE_PENDING_ACTIVATION_DISCRIMINATOR);
 }
 
 export type RevokePendingActivationInstruction<
-  TProgram extends string = typeof FEATURE_GATE_PROGRAM_ADDRESS,
-  TAccountFeature extends string | AccountMeta<string> = string,
-  TAccountIncinerator extends string | AccountMeta<string> = string,
-  TAccountSystemProgram extends string | AccountMeta<string> =
-    '11111111111111111111111111111111',
-  TRemainingAccounts extends readonly AccountMeta<string>[] = [],
+    TProgram extends string = typeof FEATURE_GATE_PROGRAM_ADDRESS,
+    TAccountFeature extends string | AccountMeta<string> = string,
+    TAccountIncinerator extends string | AccountMeta<string> = string,
+    TAccountSystemProgram extends string | AccountMeta<string> = '11111111111111111111111111111111',
+    TRemainingAccounts extends readonly AccountMeta<string>[] = [],
 > = Instruction<TProgram> &
-  InstructionWithData<ReadonlyUint8Array> &
-  InstructionWithAccounts<
-    [
-      TAccountFeature extends string
-        ? WritableSignerAccount<TAccountFeature> &
-            AccountSignerMeta<TAccountFeature>
-        : TAccountFeature,
-      TAccountIncinerator extends string
-        ? WritableAccount<TAccountIncinerator>
-        : TAccountIncinerator,
-      TAccountSystemProgram extends string
-        ? ReadonlyAccount<TAccountSystemProgram>
-        : TAccountSystemProgram,
-      ...TRemainingAccounts,
-    ]
-  >;
+    InstructionWithData<ReadonlyUint8Array> &
+    InstructionWithAccounts<
+        [
+            TAccountFeature extends string
+                ? WritableSignerAccount<TAccountFeature> & AccountSignerMeta<TAccountFeature>
+                : TAccountFeature,
+            TAccountIncinerator extends string ? WritableAccount<TAccountIncinerator> : TAccountIncinerator,
+            TAccountSystemProgram extends string ? ReadonlyAccount<TAccountSystemProgram> : TAccountSystemProgram,
+            ...TRemainingAccounts,
+        ]
+    >;
 
 export type RevokePendingActivationInstructionData = { discriminator: number };
 
 export type RevokePendingActivationInstructionDataArgs = {};
 
 export function getRevokePendingActivationInstructionDataEncoder(): FixedSizeEncoder<RevokePendingActivationInstructionDataArgs> {
-  return transformEncoder(
-    getStructEncoder([['discriminator', getU8Encoder()]]),
-    (value) => ({
-      ...value,
-      discriminator: REVOKE_PENDING_ACTIVATION_DISCRIMINATOR,
-    })
-  );
+    return transformEncoder(getStructEncoder([['discriminator', getU8Encoder()]]), value => ({
+        ...value,
+        discriminator: REVOKE_PENDING_ACTIVATION_DISCRIMINATOR,
+    }));
 }
 
 export function getRevokePendingActivationInstructionDataDecoder(): FixedSizeDecoder<RevokePendingActivationInstructionData> {
-  return getStructDecoder([['discriminator', getU8Decoder()]]);
+    return getStructDecoder([['discriminator', getU8Decoder()]]);
 }
 
 export function getRevokePendingActivationInstructionDataCodec(): FixedSizeCodec<
-  RevokePendingActivationInstructionDataArgs,
-  RevokePendingActivationInstructionData
+    RevokePendingActivationInstructionDataArgs,
+    RevokePendingActivationInstructionData
 > {
-  return combineCodec(
-    getRevokePendingActivationInstructionDataEncoder(),
-    getRevokePendingActivationInstructionDataDecoder()
-  );
+    return combineCodec(
+        getRevokePendingActivationInstructionDataEncoder(),
+        getRevokePendingActivationInstructionDataDecoder(),
+    );
 }
 
 export type RevokePendingActivationInput<
-  TAccountFeature extends string = string,
-  TAccountIncinerator extends string = string,
-  TAccountSystemProgram extends string = string,
+    TAccountFeature extends string = string,
+    TAccountIncinerator extends string = string,
+    TAccountSystemProgram extends string = string,
 > = {
-  /** The feature account to revoke */
-  feature: TransactionSigner<TAccountFeature>;
-  /** The incinerator account */
-  incinerator: Address<TAccountIncinerator>;
-  /** The system program */
-  systemProgram?: Address<TAccountSystemProgram>;
+    /** The feature account to revoke */
+    feature: TransactionSigner<TAccountFeature>;
+    /** The incinerator account */
+    incinerator: Address<TAccountIncinerator>;
+    /** The system program */
+    systemProgram?: Address<TAccountSystemProgram>;
 };
 
 export function getRevokePendingActivationInstruction<
-  TAccountFeature extends string,
-  TAccountIncinerator extends string,
-  TAccountSystemProgram extends string,
-  TProgramAddress extends Address = typeof FEATURE_GATE_PROGRAM_ADDRESS,
+    TAccountFeature extends string,
+    TAccountIncinerator extends string,
+    TAccountSystemProgram extends string,
+    TProgramAddress extends Address = typeof FEATURE_GATE_PROGRAM_ADDRESS,
 >(
-  input: RevokePendingActivationInput<
-    TAccountFeature,
-    TAccountIncinerator,
-    TAccountSystemProgram
-  >,
-  config?: { programAddress?: TProgramAddress }
-): RevokePendingActivationInstruction<
-  TProgramAddress,
-  TAccountFeature,
-  TAccountIncinerator,
-  TAccountSystemProgram
-> {
-  // Program address.
-  const programAddress = config?.programAddress ?? FEATURE_GATE_PROGRAM_ADDRESS;
+    input: RevokePendingActivationInput<TAccountFeature, TAccountIncinerator, TAccountSystemProgram>,
+    config?: { programAddress?: TProgramAddress },
+): RevokePendingActivationInstruction<TProgramAddress, TAccountFeature, TAccountIncinerator, TAccountSystemProgram> {
+    // Program address.
+    const programAddress = config?.programAddress ?? FEATURE_GATE_PROGRAM_ADDRESS;
 
-  // Original accounts.
-  const originalAccounts = {
-    feature: { value: input.feature ?? null, isWritable: true },
-    incinerator: { value: input.incinerator ?? null, isWritable: true },
-    systemProgram: { value: input.systemProgram ?? null, isWritable: false },
-  };
-  const accounts = originalAccounts as Record<
-    keyof typeof originalAccounts,
-    ResolvedInstructionAccount
-  >;
+    // Original accounts.
+    const originalAccounts = {
+        feature: { value: input.feature ?? null, isWritable: true },
+        incinerator: { value: input.incinerator ?? null, isWritable: true },
+        systemProgram: { value: input.systemProgram ?? null, isWritable: false },
+    };
+    const accounts = originalAccounts as Record<keyof typeof originalAccounts, ResolvedInstructionAccount>;
 
-  // Resolve default values.
-  if (!accounts.systemProgram.value) {
-    accounts.systemProgram.value =
-      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
-  }
+    // Resolve default values.
+    if (!accounts.systemProgram.value) {
+        accounts.systemProgram.value =
+            '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
+    }
 
-  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
-  return Object.freeze({
-    accounts: [
-      getAccountMeta('feature', accounts.feature),
-      getAccountMeta('incinerator', accounts.incinerator),
-      getAccountMeta('systemProgram', accounts.systemProgram),
-    ],
-    data: getRevokePendingActivationInstructionDataEncoder().encode({}),
-    programAddress,
-  } as RevokePendingActivationInstruction<
-    TProgramAddress,
-    TAccountFeature,
-    TAccountIncinerator,
-    TAccountSystemProgram
-  >);
+    const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
+    return Object.freeze({
+        accounts: [
+            getAccountMeta('feature', accounts.feature),
+            getAccountMeta('incinerator', accounts.incinerator),
+            getAccountMeta('systemProgram', accounts.systemProgram),
+        ],
+        data: getRevokePendingActivationInstructionDataEncoder().encode({}),
+        programAddress,
+    } as RevokePendingActivationInstruction<
+        TProgramAddress,
+        TAccountFeature,
+        TAccountIncinerator,
+        TAccountSystemProgram
+    >);
 }
 
 export type ParsedRevokePendingActivationInstruction<
-  TProgram extends string = typeof FEATURE_GATE_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[],
+    TProgram extends string = typeof FEATURE_GATE_PROGRAM_ADDRESS,
+    TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[],
 > = {
-  programAddress: Address<TProgram>;
-  accounts: {
-    /** The feature account to revoke */
-    feature: TAccountMetas[0];
-    /** The incinerator account */
-    incinerator: TAccountMetas[1];
-    /** The system program */
-    systemProgram: TAccountMetas[2];
-  };
-  data: RevokePendingActivationInstructionData;
+    programAddress: Address<TProgram>;
+    accounts: {
+        /** The feature account to revoke */
+        feature: TAccountMetas[0];
+        /** The incinerator account */
+        incinerator: TAccountMetas[1];
+        /** The system program */
+        systemProgram: TAccountMetas[2];
+    };
+    data: RevokePendingActivationInstructionData;
 };
 
 export function parseRevokePendingActivationInstruction<
-  TProgram extends string,
-  TAccountMetas extends readonly AccountMeta[],
+    TProgram extends string,
+    TAccountMetas extends readonly AccountMeta[],
 >(
-  instruction: Instruction<TProgram> &
-    InstructionWithAccounts<TAccountMetas> &
-    InstructionWithData<ReadonlyUint8Array>
+    instruction: Instruction<TProgram> &
+        InstructionWithAccounts<TAccountMetas> &
+        InstructionWithData<ReadonlyUint8Array>,
 ): ParsedRevokePendingActivationInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 3) {
-    throw new SolanaError(
-      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
-      {
-        actualAccountMetas: instruction.accounts.length,
-        expectedAccountMetas: 3,
-      }
-    );
-  }
-  let accountIndex = 0;
-  const getNextAccount = () => {
-    const accountMeta = (instruction.accounts as TAccountMetas)[accountIndex]!;
-    accountIndex += 1;
-    return accountMeta;
-  };
-  return {
-    programAddress: instruction.programAddress,
-    accounts: {
-      feature: getNextAccount(),
-      incinerator: getNextAccount(),
-      systemProgram: getNextAccount(),
-    },
-    data: getRevokePendingActivationInstructionDataDecoder().decode(
-      instruction.data
-    ),
-  };
+    if (instruction.accounts.length < 3) {
+        throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS, {
+            actualAccountMetas: instruction.accounts.length,
+            expectedAccountMetas: 3,
+        });
+    }
+    let accountIndex = 0;
+    const getNextAccount = () => {
+        const accountMeta = (instruction.accounts as TAccountMetas)[accountIndex]!;
+        accountIndex += 1;
+        return accountMeta;
+    };
+    return {
+        programAddress: instruction.programAddress,
+        accounts: { feature: getNextAccount(), incinerator: getNextAccount(), systemProgram: getNextAccount() },
+        data: getRevokePendingActivationInstructionDataDecoder().decode(instruction.data),
+    };
 }
