@@ -2,7 +2,15 @@
     "name": "@solana-program/feature-gate",
     "version": "0.0.0",
     "description": "JavaScript client for the Feature Gate program",
+    "homepage": "https://github.com/solana-program/feature-gate#readme",
+    "bugs": {
+        "url": "https://github.com/solana-program/feature-gate/issues"
+    },
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/solana-program/feature-gate.git"
+    },
     "files": [
         "./dist/src",
         "./dist/types"
