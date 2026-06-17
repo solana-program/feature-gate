@@ -17,6 +17,7 @@ import {
     type Address,
     type ClientWithTransactionPlanning,
     type ClientWithTransactionSending,
+    type ExtendedClient,
     type Instruction,
     type InstructionWithData,
     type ReadonlyUint8Array,
@@ -73,7 +74,11 @@ export function parseFeatureGateInstruction<TProgram extends string>(
     }
 }
 
-export type FeatureGatePlugin = { instructions: FeatureGatePluginInstructions };
+export type FeatureGatePlugin = {
+    instructions: FeatureGatePluginInstructions;
+    identifyInstruction: typeof identifyFeatureGateInstruction;
+    parseInstruction: typeof parseFeatureGateInstruction;
+};
 
 export type FeatureGatePluginInstructions = {
     revokePendingActivation: (
@@ -86,13 +91,15 @@ export type FeatureGatePluginRequirements = ClientWithTransactionPlanning & Clie
 export function featureGateProgram() {
     return <T extends FeatureGatePluginRequirements>(
         client: T,
-    ): Omit<T, 'featureGate'> & { featureGate: FeatureGatePlugin } => {
+    ): ExtendedClient<T, { featureGate: FeatureGatePlugin }> => {
         return extendClient(client, {
             featureGate: <FeatureGatePlugin>{
                 instructions: {
                     revokePendingActivation: input =>
                         addSelfPlanAndSendFunctions(client, getRevokePendingActivationInstruction(input)),
                 },
+                identifyInstruction: identifyFeatureGateInstruction,
+                parseInstruction: parseFeatureGateInstruction,
             },
         });
     };
