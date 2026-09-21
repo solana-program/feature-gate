@@ -26,11 +26,17 @@ import {
     type InstructionWithData,
     type ReadonlyAccount,
     type ReadonlyUint8Array,
-    type TransactionSigner,
     type WritableAccount,
     type WritableSignerAccount,
 } from '@solana/kit';
-import { getAccountMetaFactory, type ResolvedInstructionAccount } from '@solana/kit/program-client-core';
+import {
+    getAccountMetaFactory,
+    type InstructionAccountInput,
+    type InstructionAccountInputAddress,
+    type InstructionSignerInput,
+    type ResolvedInstructionAccount,
+    type ResolvedInstructionAccountMeta,
+} from '@solana/kit/program-client-core';
 import { FEATURE_GATE_PROGRAM_ADDRESS } from '../programs';
 
 export const REVOKE_PENDING_ACTIVATION_DISCRIMINATOR = 0;
@@ -84,35 +90,43 @@ export function getRevokePendingActivationInstructionDataCodec(): FixedSizeCodec
 }
 
 export type RevokePendingActivationInput<
-    TAccountFeature extends string = string,
-    TAccountIncinerator extends string = string,
-    TAccountSystemProgram extends string = string,
+    TAccountFeature extends InstructionSignerInput = InstructionSignerInput,
+    TAccountIncinerator extends InstructionAccountInput = InstructionAccountInput,
+    TAccountSystemProgram extends InstructionAccountInput = InstructionAccountInput,
 > = {
     /** The feature account to revoke */
-    feature: TransactionSigner<TAccountFeature>;
+    feature: TAccountFeature;
     /** The incinerator account */
-    incinerator: Address<TAccountIncinerator>;
+    incinerator: TAccountIncinerator;
     /** The system program */
-    systemProgram?: Address<TAccountSystemProgram>;
+    systemProgram?: TAccountSystemProgram;
 };
 
 export function getRevokePendingActivationInstruction<
-    TAccountFeature extends string,
-    TAccountIncinerator extends string,
-    TAccountSystemProgram extends string,
+    TAccountFeature extends InstructionSignerInput,
+    TAccountIncinerator extends InstructionAccountInput,
+    TAccountSystemProgram extends InstructionAccountInput,
     TProgramAddress extends Address = typeof FEATURE_GATE_PROGRAM_ADDRESS,
 >(
     input: RevokePendingActivationInput<TAccountFeature, TAccountIncinerator, TAccountSystemProgram>,
     config?: { programAddress?: TProgramAddress },
-): RevokePendingActivationInstruction<TProgramAddress, TAccountFeature, TAccountIncinerator, TAccountSystemProgram> {
+): RevokePendingActivationInstruction<
+    TProgramAddress,
+    ResolvedInstructionAccountMeta<TAccountFeature, InstructionAccountInputAddress<TAccountFeature>>,
+    ResolvedInstructionAccountMeta<TAccountIncinerator, InstructionAccountInputAddress<TAccountIncinerator>>,
+    ResolvedInstructionAccountMeta<TAccountSystemProgram, InstructionAccountInputAddress<TAccountSystemProgram>>
+> {
     // Program address.
     const programAddress = config?.programAddress ?? FEATURE_GATE_PROGRAM_ADDRESS;
 
+    // Account meta helper.
+    const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
+
     // Original accounts.
     const originalAccounts = {
-        feature: { value: input.feature ?? null, isWritable: true },
-        incinerator: { value: input.incinerator ?? null, isWritable: true },
-        systemProgram: { value: input.systemProgram ?? null, isWritable: false },
+        feature: { value: input.feature ?? null, isSigner: true, isWritable: true },
+        incinerator: { value: input.incinerator ?? null, isSigner: false, isWritable: true },
+        systemProgram: { value: input.systemProgram ?? null, isSigner: false, isWritable: false },
     };
     const accounts = originalAccounts as Record<keyof typeof originalAccounts, ResolvedInstructionAccount>;
 
@@ -122,7 +136,6 @@ export function getRevokePendingActivationInstruction<
             '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
     }
 
-    const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
     return Object.freeze({
         accounts: [
             getAccountMeta('feature', accounts.feature),
@@ -133,9 +146,9 @@ export function getRevokePendingActivationInstruction<
         programAddress,
     } as RevokePendingActivationInstruction<
         TProgramAddress,
-        TAccountFeature,
-        TAccountIncinerator,
-        TAccountSystemProgram
+        ResolvedInstructionAccountMeta<TAccountFeature, InstructionAccountInputAddress<TAccountFeature>>,
+        ResolvedInstructionAccountMeta<TAccountIncinerator, InstructionAccountInputAddress<TAccountIncinerator>>,
+        ResolvedInstructionAccountMeta<TAccountSystemProgram, InstructionAccountInputAddress<TAccountSystemProgram>>
     >);
 }
 
