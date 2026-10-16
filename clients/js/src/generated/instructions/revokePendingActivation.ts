@@ -109,7 +109,7 @@ export function getRevokePendingActivationInstruction<
     TProgramAddress extends Address = typeof FEATURE_GATE_PROGRAM_ADDRESS,
 >(
     input: RevokePendingActivationInput<TAccountFeature, TAccountIncinerator, TAccountSystemProgram>,
-    config?: { programAddress?: TProgramAddress },
+    config?: { programAddress?: TProgramAddress | { readonly address: TProgramAddress } },
 ): RevokePendingActivationInstruction<
     TProgramAddress,
     ResolvedInstructionAccountMeta<TAccountFeature, InstructionAccountInputAddress<TAccountFeature>>,
@@ -117,7 +117,8 @@ export function getRevokePendingActivationInstruction<
     ResolvedInstructionAccountMeta<TAccountSystemProgram, InstructionAccountInputAddress<TAccountSystemProgram>>
 > {
     // Program address.
-    const programAddress = config?.programAddress ?? FEATURE_GATE_PROGRAM_ADDRESS;
+    const programAddressInput = config?.programAddress ?? FEATURE_GATE_PROGRAM_ADDRESS;
+    const programAddress = typeof programAddressInput === 'string' ? programAddressInput : programAddressInput.address;
 
     // Account meta helper.
     const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');

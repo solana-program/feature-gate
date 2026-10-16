@@ -18,6 +18,7 @@ import {
     type ClientWithTransactionPlanning,
     type ClientWithTransactionSending,
     type ExtendedClient,
+    type HasAddress,
     type Instruction,
     type InstructionWithData,
     type ReadonlyUint8Array,
@@ -83,20 +84,26 @@ export type FeatureGatePlugin = {
 export type FeatureGatePluginInstructions = {
     revokePendingActivation: (
         input: RevokePendingActivationInput,
+        config?: { programAddress?: Address | HasAddress },
     ) => ReturnType<typeof getRevokePendingActivationInstruction> & SelfPlanAndSendFunctions;
 };
 
 export type FeatureGatePluginRequirements = ClientWithTransactionPlanning & ClientWithTransactionSending;
 
-export function featureGateProgram() {
+export function featureGateProgram(config: { programAddress?: Address | HasAddress } = {}) {
     return <T extends FeatureGatePluginRequirements>(
         client: T,
     ): ExtendedClient<T, { featureGate: FeatureGatePlugin }> => {
         return extendClient(client, {
             featureGate: <FeatureGatePlugin>{
                 instructions: {
-                    revokePendingActivation: input =>
-                        addSelfPlanAndSendFunctions(client, getRevokePendingActivationInstruction(input)),
+                    revokePendingActivation: (input, instructionConfig) =>
+                        addSelfPlanAndSendFunctions(
+                            client,
+                            getRevokePendingActivationInstruction(input, {
+                                programAddress: instructionConfig?.programAddress ?? config.programAddress,
+                            }),
+                        ),
                 },
                 identifyInstruction: identifyFeatureGateInstruction,
                 parseInstruction: parseFeatureGateInstruction,
