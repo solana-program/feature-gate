@@ -1,3 +1,11 @@
+#### 2026-10-27 14:56:52.407827250 UTC
+
+Solana CLI Version: solana-cli 4.2.2 (src:73c4d230; feat:21b0d33a, client:Agave)
+
+| Name | CUs | Delta |
+|------|------|-------|
+| revoke_pending_activation | 2564 | -159 |
+
 #### 2026-06-04 09:25:31.224944 UTC
 
 Solana CLI Version: solana-cli 3.1.14 (src:3134055b; feat:534737035, client:Agave)

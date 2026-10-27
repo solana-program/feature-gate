@@ -103,7 +103,7 @@ fn success() {
         ],
         &[
             Check::success(),
-            Check::compute_units(2_723),
+            Check::compute_units(2_564),
             // Confirm feature account was closed.
             Check::account(&feature).closed().build(),
         ],
