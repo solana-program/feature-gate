@@ -3,7 +3,7 @@
 use {
     mollusk_svm::{program::keyed_account_for_system_program, Mollusk},
     mollusk_svm_bencher::{Bench, MolluskComputeUnitBencher},
-    solana_account::Account,
+    solana_account::{state_traits::StateMutWincode, Account},
     solana_address::Address,
     solana_feature_gate_interface::Feature,
     solana_feature_gate_program::instruction::revoke_pending_activation,
