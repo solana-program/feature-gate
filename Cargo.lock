@@ -1472,8 +1472,8 @@ dependencies = [
  "solana-pubkey 4.4.0",
  "solana-rent",
  "solana-sdk-ids",
- "solana-slot-hashes 3.2.0",
- "solana-stake-history 1.1.0",
+ "solana-slot-hashes",
+ "solana-stake-history",
  "solana-svm",
  "solana-svm-callback",
  "solana-svm-feature-set",
@@ -1481,7 +1481,7 @@ dependencies = [
  "solana-svm-timings",
  "solana-syscalls",
  "solana-system-program",
- "solana-sysvar 4.3.0",
+ "solana-sysvar",
  "solana-sysvar-id",
  "solana-transaction-context",
  "solana-transaction-error",
@@ -2190,15 +2190,10 @@ version = "5.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "640ce88f7a577428305e82c86cfbd805009932e1fbf6e4fb362139fa73651179"
 dependencies = [
- "bincode",
- "serde",
- "serde_bytes",
- "serde_derive",
  "solana-account-info",
  "solana-clock 4.0.0",
  "solana-instruction-error 3.1.0",
  "solana-pubkey 4.4.0",
- "solana-sysvar 5.0.0",
  "wincode",
 ]
 
@@ -2466,9 +2461,6 @@ version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e429812a07f338b834f5fb14ecacc94750e1c3efcc6af8ad8d6c22ffc526af0"
 dependencies = [
- "bincode",
- "serde",
- "serde_derive",
  "solana-account 5.2.0",
  "solana-account-info",
  "solana-instruction 4.0.0",
@@ -2845,9 +2837,9 @@ dependencies = [
  "solana-rent",
  "solana-sbpf",
  "solana-sdk-ids",
- "solana-slot-hashes 3.2.0",
+ "solana-slot-hashes",
  "solana-stable-layout",
- "solana-stake-history 1.1.0",
+ "solana-stake-history",
  "solana-svm-callback",
  "solana-svm-feature-set",
  "solana-svm-log-collector",
@@ -2856,7 +2848,7 @@ dependencies = [
  "solana-svm-transaction",
  "solana-svm-type-overrides",
  "solana-system-interface",
- "solana-sysvar 4.3.0",
+ "solana-sysvar",
  "solana-sysvar-id",
  "solana-transaction-context",
  "thiserror 2.0.21",
@@ -3009,18 +3001,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "solana-slot-hashes"
-version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3da667c6de47dd04fa03cd3a29f2ce046627407f0de0dc56c5d78ed1ba23785"
-dependencies = [
- "solana-get-sysvar",
- "solana-hash",
- "solana-sdk-ids",
- "solana-sysvar-id",
-]
-
-[[package]]
 name = "solana-slot-history"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3053,18 +3033,6 @@ dependencies = [
  "serde",
  "serde_derive",
  "solana-clock 3.2.1",
- "solana-get-sysvar",
- "solana-sdk-ids",
- "solana-sysvar-id",
-]
-
-[[package]]
-name = "solana-stake-history"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edab56849103bda42aed2f34ccdd65cd764af9e598117ca54ebc5ec7211292b4"
-dependencies = [
- "solana-clock 4.0.0",
  "solana-get-sysvar",
  "solana-sdk-ids",
  "solana-sysvar-id",
@@ -3213,7 +3181,7 @@ dependencies = [
  "solana-sha256-hasher",
  "solana-sha512-hasher",
  "solana-stable-layout",
- "solana-stake-history 1.1.0",
+ "solana-stake-history",
  "solana-svm-feature-set",
  "solana-svm-log-collector",
  "solana-svm-type-overrides",
@@ -3259,7 +3227,7 @@ dependencies = [
  "solana-sdk-ids",
  "solana-svm-log-collector",
  "solana-system-interface",
- "solana-sysvar 4.3.0",
+ "solana-sysvar",
  "solana-transaction-context",
 ]
 
@@ -3290,41 +3258,9 @@ dependencies = [
  "solana-rent",
  "solana-sdk-ids",
  "solana-sdk-macro",
- "solana-slot-hashes 3.2.0",
+ "solana-slot-hashes",
  "solana-slot-history",
- "solana-stake-history 1.1.0",
- "solana-sysvar-id",
-]
-
-[[package]]
-name = "solana-sysvar"
-version = "5.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcfc1dead2b328974e09500feb2e413fc2be82bb3ffebc87132804cdce87d31b"
-dependencies = [
- "base64",
- "lazy_static",
- "solana-account-info",
- "solana-clock 4.0.0",
- "solana-define-syscall 5.3.0",
- "solana-epoch-rewards",
- "solana-epoch-schedule",
- "solana-fee-calculator",
- "solana-get-sysvar",
- "solana-hash",
- "solana-instruction 4.0.0",
- "solana-instruction-error 3.1.0",
- "solana-last-restart-slot",
- "solana-program-entrypoint",
- "solana-program-error",
- "solana-program-memory",
- "solana-pubkey 4.4.0",
- "solana-rent",
- "solana-sdk-ids",
- "solana-sdk-macro",
- "solana-slot-hashes 4.0.0",
- "solana-slot-history",
- "solana-stake-history 2.1.0",
+ "solana-stake-history",
  "solana-sysvar-id",
 ]
 
