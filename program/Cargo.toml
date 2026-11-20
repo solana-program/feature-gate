@@ -29,9 +29,9 @@ solana-system-interface = { version = "3", features = ["bincode"] }
 thiserror = "2.0.9"
 
 [dev-dependencies]
-mollusk-svm = "0.16.0"
-mollusk-svm-bencher = "0.16.0"
-solana-account = { version = "4.0.0", features = ["wincode"] }
+mollusk-svm = "0.17.1"
+mollusk-svm-bencher = "0.17.1"
+solana-account = { version = "5.0.0", features = ["wincode"] }
 solana-address = { version = "2.6.0", features = ["atomic"] }
 solana-rent = "4.2.0"
 
